@@ -129,7 +129,7 @@ async function attemptById(id: string) {
 }
 
 async function attachProviderId(attemptId: string, providerId: string) {
-  const rows = checked(
+  const rows = required(
     await db()
       .from("payment_attempts")
       .update({ provider_payment_id: providerId, updated_at: new Date().toISOString() })
