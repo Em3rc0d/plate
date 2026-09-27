@@ -2270,3 +2270,89 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Hero correction: the approved automotive master must remain fully legible. */
+.master-hero-grid {
+  grid-template-columns: 46% 54%;
+}
+
+.master-hero-art {
+  min-height: 560px;
+  aspect-ratio: 836 / 590;
+  background: #d8e0e5;
+}
+
+.master-hero-art::before {
+  width: 11%;
+  background: linear-gradient(90deg, #f7f3ec 0%, rgba(247,243,236,.55) 40%, rgba(247,243,236,0) 100%);
+}
+
+.master-hero-art img {
+  object-fit: cover;
+  object-position: center center;
+  transform: none;
+}
+
+.master-art-note {
+  position: absolute;
+  z-index: 7;
+  left: 18px;
+  bottom: 14px;
+  max-width: 440px;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(7, 39, 67, .83);
+  color: rgba(255,255,255,.94);
+  font-size: 9px;
+  line-height: 1.35;
+  backdrop-filter: blur(6px);
+}
+
+@media (max-width: 900px) {
+  .master-hero-grid {
+    display: block;
+  }
+
+  .master-hero-art {
+    min-height: 0;
+    aspect-ratio: 836 / 590;
+    margin-inline: -24px;
+  }
+
+  .master-hero-art img {
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .master-hero-art::before {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .master-hero-art {
+    min-height: 0;
+    aspect-ratio: 836 / 590;
+    margin-inline: -16px;
+  }
+
+  .master-hero-art img {
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .master-demo-badge {
+    top: 10px;
+    right: 10px;
+  }
+
+  .master-art-note {
+    left: 10px;
+    bottom: 10px;
+    right: 10px;
+    max-width: none;
+    font-size: 8px;
+  }
+}
