@@ -139,9 +139,11 @@ export function MercadoPagoCheckout({
       }
       if (["REJECTED", "CANCELLED"].includes(payment.status)) {
         idempotencyKey.current = crypto.randomUUID();
-        setError(
-          "Mercado Pago rechazó este intento. Puedes corregir los datos y volver a intentar.",
-        );
+        const detail =
+          payment.providerStatus === "bad_request"
+            ? "Mercado Pago rechazó la creación del pago. Puedes volver a intentar sin riesgo de doble cobro."
+            : "Mercado Pago rechazó este intento. Puedes corregir los datos y volver a intentar.";
+        setError(detail);
         return;
       }
       setMessage(
