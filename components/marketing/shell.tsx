@@ -1,30 +1,50 @@
 import { env } from "@/src/config/env";
 import Link from "next/link";
-import { CarFront } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { productName, legalNotice } from "@/src/config/product";
 import { Button } from "@/components/ui/button";
+
 export function Header() {
   return (
-    <header className="wrap nav">
-      <Link className="brand" href="/">
-        <span className="brand-icon">
-          <CarFront size={24} aria-hidden="true" />
-        </span>
-        {productName}
-      </Link>
-      <nav className="nav-links" aria-label="Principal">
-        <Link href="/#cobertura">Qué incluye</Link>
-        <Link href="/#como-funciona">Cómo funciona</Link>
-        <Link className="mobile-price" href="/#precio">
-          Precio
-        </Link>
-        <Button asChild variant="outline">
-          <Link href="/consulta">Consultar placa</Link>
-        </Button>
-      </nav>
+    <header className="master-header">
+      <div className="wrap nav">
+        <div className="brand-cluster">
+          <Link className="brand" href="/">
+            <span className="brand-mark" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>{productName}</span>
+          </Link>
+          <span className="brand-country">
+            <i aria-hidden="true" />
+            PERÚ
+          </span>
+        </div>
+
+        <nav className="nav-links" aria-label="Principal">
+          <Link href="/#cobertura">Qué incluye</Link>
+          <Link href="/#fuentes">Cobertura</Link>
+          <Link href="/#precio">Precio</Link>
+          <Link href="/#preguntas">Preguntas</Link>
+        </nav>
+
+        <div className="nav-actions">
+          <Button asChild variant="outline">
+            <Link href="/#reporte-ejemplo">Ver ejemplo</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/consulta">
+              Consultar placa <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </header>
   );
 }
+
 export function Footer() {
   return (
     <footer className="wrap footer">
@@ -55,8 +75,7 @@ export function Footer() {
       )}
       {env.SUPPORT_EMAIL && (
         <p>
-          Soporte:{" "}
-          <a href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a>
+          Soporte: <a href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a>
         </p>
       )}
       <p>{legalNotice}</p>
