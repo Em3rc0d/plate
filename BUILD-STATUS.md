@@ -23,10 +23,13 @@ PASS en funciones significa implementación completada y compatible con lint, ti
 
 ## Build
 - Migrations: APPLIED en Supabase `vehicle-intelligence-pe`: initial_vehicle_platform, finishing_launch_controls y add_fk_indexes. El tercer archivo cubre los FK indexados señalados por Performance Advisor.
-- Lint: PASS en el build de Astra previo al parche `commercialReady`; no se pudo rerun localmente por falta de acceso al registry de pnpm.
-- Typecheck: PASS en el build de Astra previo al parche. Los archivos tocados por `commercialReady` pasaron validación sintáctica con TypeScript 5.8.3 en este entorno.
-- Build: PASS en el build de Astra previo al parche, Next.js 16.3.6/webpack. Requiere un rerun final en Vercel o un entorno con dependencias instalables antes de abrir tráfico.
-- Tests/CI: no creados ni ejecutados.
+- Lockfile: PASS. `pnpm-lock.yaml` fue regenerado desde el manifiesto actual con pnpm 11.25.0 y quedó versionado en `main`.
+- Frozen install: PASS con `pnpm install --frozen-lockfile` en runner Linux limpio.
+- Lint: PASS sobre el código actual.
+- Typecheck: PASS sobre el código actual.
+- Build: PASS sobre el código actual con Next.js 16.3.6/webpack.
+- Verificación one-shot: PASS el 2026-09-27 (GitHub Actions run 36293403269). El workflow temporal se elimina después de la verificación; no se mantiene CI persistente.
+- Tests: no creados ni ejecutados por alcance.
 - Deployment: no desplegado.
 - Supabase Security Advisor: PASS — sin lints de seguridad tras aplicar migraciones.
 - Supabase Performance Advisor: sin foreign keys sin índice; solo avisos INFO de índices todavía no usados en una base vacía.
