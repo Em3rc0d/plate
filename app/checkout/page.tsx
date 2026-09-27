@@ -1,7 +1,7 @@
 import { CoverageList } from "@/components/marketing/coverage-list";
 import { Header, Footer } from "@/components/marketing/shell";
 import { OrderForm } from "@/components/checkout/order-form";
-import { env } from "@/src/config/env";
+import { env, mercadoPagoConfigured } from "@/src/config/env";
 import { offeringName } from "@/src/config/commercial";
 import { commercialReadiness } from "@/src/config/commercial";
 import { normalizePlate } from "@/src/vehicle/normalize-plate";
@@ -38,8 +38,9 @@ export default async function Page({
             <p className="muted">Pago único por esta placa.</p>
             <CoverageList />
             <p className="notice">
-              Validación manual del pago. La entrega comienza después de aprobar
-              el comprobante.
+              {mercadoPagoConfigured
+                ? "Pago procesado por Mercado Pago. El reporte se genera solo después de confirmar el pago."
+                : "Validación manual del pago. La entrega comienza después de aprobar el comprobante."}
             </p>
             <p className="micro">
               No reemplaza una revisión mecánica ni certificación registral.
@@ -57,6 +58,8 @@ export default async function Page({
               termsVersion={env.TERMS_VERSION}
               privacyVersion={env.PRIVACY_VERSION}
               enabled={{
+                MP_YAPE: ready && mercadoPagoConfigured,
+                MP_CARD: ready && mercadoPagoConfigured,
                 YAPE: ready && !!env.YAPE_PHONE && !!env.YAPE_DISPLAY_NAME,
                 PLIN: ready && !!env.PLIN_PHONE && !!env.PLIN_DISPLAY_NAME,
               }}
