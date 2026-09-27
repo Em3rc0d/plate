@@ -1,6 +1,8 @@
 import "server-only";
 import { z } from "zod";
 const optional = z.string().default("");
+const blankAsUndefined = (v: unknown) =>
+  typeof v === "string" && v.trim() === "" ? undefined : v;
 const defaultSiteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : "http://localhost:3000";
@@ -26,10 +28,16 @@ const amount = (fallback: number) =>
   );
 export const env = z
   .object({
-    NEXT_PUBLIC_PRODUCT_NAME: z.string().default("Vehicle Intelligence PE"),
+    NEXT_PUBLIC_PRODUCT_NAME: z.preprocess(
+      blankAsUndefined,
+      z.string().default("Vehicle Intelligence PE"),
+    ),
     NEXT_PUBLIC_SITE_URL: siteUrl,
     REPORT_PRICE_PEN: amount(15.9),
-    LAUNCH_PROFILE: z.enum(["REGISTRY_LEAN", "FULL"]).default("REGISTRY_LEAN"),
+    LAUNCH_PROFILE: z.preprocess(
+      blankAsUndefined,
+      z.enum(["REGISTRY_LEAN", "FULL"]).default("REGISTRY_LEAN"),
+    ),
     NEXT_PUBLIC_SUPABASE_URL: optional,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: optional,
     SUPABASE_SERVICE_ROLE_KEY: optional,
@@ -43,7 +51,10 @@ export const env = z
     REPORT_FROM_EMAIL: optional,
     ADMIN_EMAIL: optional,
     OPENAI_API_KEY: optional,
-    OPENAI_MODEL: z.string().default("gpt-4.1-mini"),
+    OPENAI_MODEL: z.preprocess(
+      blankAsUndefined,
+      z.string().default("gpt-4.1-mini"),
+    ),
     NEXT_PUBLIC_POSTHOG_KEY: optional,
     NEXT_PUBLIC_POSTHOG_HOST: optional,
     SENTRY_DSN: optional,
@@ -76,9 +87,18 @@ export const env = z
           .refine((v) => v.startsWith("https://")),
       ])
       .default(""),
-    TERMS_VERSION: z.string().min(1).default("2026-09"),
-    PRIVACY_VERSION: z.string().min(1).default("2026-09"),
-    REFUND_POLICY_VERSION: z.string().min(1).default("2026-09"),
+    TERMS_VERSION: z.preprocess(
+      blankAsUndefined,
+      z.string().min(1).default("2026-09"),
+    ),
+    PRIVACY_VERSION: z.preprocess(
+      blankAsUndefined,
+      z.string().min(1).default("2026-09"),
+    ),
+    REFUND_POLICY_VERSION: z.preprocess(
+      blankAsUndefined,
+      z.string().min(1).default("2026-09"),
+    ),
     PAYMENT_PROOF_RETENTION_DAYS: z.preprocess(
       (v) => (v === "" || v === undefined ? null : v),
       z.coerce.number().int().positive().nullable(),
@@ -87,7 +107,10 @@ export const env = z
       (v) => (v === "" || v === undefined ? null : v),
       z.coerce.number().int().positive().nullable(),
     ),
-    PREVIEW_PROVIDER_MODE: z.enum(["NONE", "BASIC", "FULL"]).default("NONE"),
+    PREVIEW_PROVIDER_MODE: z.preprocess(
+      blankAsUndefined,
+      z.enum(["NONE", "BASIC", "FULL"]).default("NONE"),
+    ),
   })
   .parse(process.env);
 export const databaseConfigured = !!(
