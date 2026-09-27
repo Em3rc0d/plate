@@ -113,6 +113,10 @@ export const env = z
     ),
   })
   .parse(process.env);
+export const bookOfClaimsUrl =
+  env.BOOK_OF_CLAIMS_URL ||
+  new URL("/libro-de-reclamaciones", env.NEXT_PUBLIC_SITE_URL).toString();
+
 export const databaseConfigured = !!(
   env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
 );

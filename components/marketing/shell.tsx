@@ -1,4 +1,4 @@
-import { env } from "@/src/config/env";
+import { bookOfClaimsUrl, env } from "@/src/config/env";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { productName, legalNotice } from "@/src/config/product";
@@ -59,11 +59,7 @@ export function Footer() {
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/terminos">Términos</Link>
           <Link href="/legal/reembolsos">Reembolsos</Link>
-          {env.BOOK_OF_CLAIMS_URL && (
-            <a href={env.BOOK_OF_CLAIMS_URL} rel="noreferrer">
-              Libro de Reclamaciones
-            </a>
-          )}
+          <a href={bookOfClaimsUrl}>Libro de Reclamaciones</a>
           <Link href="/admin">Administración</Link>
         </div>
       </div>

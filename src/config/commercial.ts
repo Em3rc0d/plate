@@ -1,5 +1,5 @@
 import "server-only";
-import { databaseConfigured, env } from "./env";
+import { bookOfClaimsUrl, databaseConfigured, env } from "./env";
 import { supports } from "./providers";
 
 export interface CommercialReadiness {
@@ -28,7 +28,7 @@ export function commercialReadiness(): CommercialReadiness {
     (env.PLIN_DISPLAY_NAME && env.PLIN_PHONE)
   );
   const legalIdentity = !!(env.BUSINESS_LEGAL_NAME && env.BUSINESS_RUC);
-  const bookOfClaims = !!env.BOOK_OF_CLAIMS_URL;
+  const bookOfClaims = !!bookOfClaimsUrl;
   const reportProvider =
     env.LAUNCH_PROFILE === "REGISTRY_LEAN"
       ? registry && identity

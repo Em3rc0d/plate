@@ -1,5 +1,5 @@
 import "server-only";
-import { env, databaseConfigured } from "./env";
+import { bookOfClaimsUrl, env, databaseConfigured } from "./env";
 import { commercialReadiness } from "./commercial";
 import { providers, supports } from "./providers";
 import { db } from "@/src/db/client";
@@ -25,11 +25,13 @@ export async function readiness(adminWorking: boolean) {
       detail,
     });
   let database = false,
-    storage = false;
+    storage = false,
+    claims = false;
   if (databaseConfigured) {
     const results = await Promise.allSettled([
       db().from("orders").select("id,generation_token,terms_version").limit(1),
       db().from("reports").select("share_code,pdf_status,revision").limit(1),
+      db().from("consumer_claims").select("id,claim_number,status").limit(1),
       db().storage.getBucket("payment-proofs"),
       db().storage.getBucket("report-pdfs"),
       db().storage.from("payment-proofs").list("", { limit: 1 }),
@@ -38,12 +40,14 @@ export async function readiness(adminWorking: boolean) {
     database = results
       .slice(0, 2)
       .every((r) => r.status === "fulfilled" && !r.value.error);
+    claims =
+      results[2]?.status === "fulfilled" && !results[2].value.error;
     storage =
       results
-        .slice(2)
+        .slice(3)
         .every((r) => r.status === "fulfilled" && !r.value.error) &&
       results
-        .slice(2, 4)
+        .slice(3, 5)
         .every(
           (r) =>
             r.status === "fulfilled" &&
@@ -63,6 +67,13 @@ export async function readiness(adminWorking: boolean) {
     "La carga y descarga reales se confirman en la compra interna.",
   );
   add("Infraestructura", "Autenticación administrativa", adminWorking);
+  add(
+    "Infraestructura",
+    "Libro de Reclamaciones y almacenamiento",
+    claims,
+    false,
+    claims ? "Tabla privada accesible." : "Aplica la migración del Libro de Reclamaciones.",
+  );
   for (const p of providers().filter(
     (p, i, arr) => arr.findIndex((x) => x.name === p.name) === i,
   ))
@@ -112,7 +123,7 @@ export async function readiness(adminWorking: boolean) {
     ["Domicilio del operador", env.BUSINESS_ADDRESS],
     ["Correo de soporte", env.SUPPORT_EMAIL],
     ["Correo de privacidad", env.PRIVACY_EMAIL],
-    ["Libro de Reclamaciones", env.BOOK_OF_CLAIMS_URL],
+    ["Libro de Reclamaciones", bookOfClaimsUrl],
   ])
     add("Negocio y privacidad", label, !!value);
   add("Negocio y privacidad", "Página de privacidad", true);
