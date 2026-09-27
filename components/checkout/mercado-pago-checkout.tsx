@@ -18,7 +18,6 @@ type CardFormData = {
   token?: string;
   paymentMethodId?: string;
   issuerId?: string;
-  installments?: string | number;
 };
 
 type CardForm = {
@@ -187,10 +186,6 @@ export function MercadoPagoCheckout({
               placeholder: "Nombre del titular",
             },
             issuer: { id: "mp-issuer", placeholder: "Banco emisor" },
-            installments: {
-              id: "mp-installments",
-              placeholder: "Cuotas",
-            },
             identificationType: { id: "mp-identification-type" },
             identificationNumber: {
               id: "mp-identification-number",
@@ -214,7 +209,7 @@ export function MercadoPagoCheckout({
               await submitInstrument({
                 token: data.token,
                 paymentMethodId: data.paymentMethodId,
-                installments: Number(data.installments || 1),
+                installments: 1,
                 ...(data.issuerId ? { issuerId: String(data.issuerId) } : {}),
               });
             },
@@ -313,7 +308,8 @@ export function MercadoPagoCheckout({
       <h2>Paga S/ {amount.toFixed(2)} con tarjeta</h2>
       <p className="micro">
         Número de tarjeta, vencimiento y CVV se capturan en campos seguros de
-        Mercado Pago y no pasan por nuestros servidores.
+        Mercado Pago y no pasan por nuestros servidores. El pago se procesa en
+        una sola cuota.
       </p>
       <form id="mp-card-form" aria-busy={busy}>
         <label className="field">
@@ -354,10 +350,6 @@ export function MercadoPagoCheckout({
         <label className="field">
           Emisor
           <select id="mp-issuer" required />
-        </label>
-        <label className="field">
-          Cuotas
-          <select id="mp-installments" required />
         </label>
         <Button disabled={busy || !ready}>
           {busy ? "Procesando…" : `Pagar S/ ${amount.toFixed(2)}`}
