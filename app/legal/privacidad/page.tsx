@@ -54,6 +54,13 @@ export default function Page() {
               : "sin plazo de eliminación configurado"}
             .
           </p>
+          <h2>Libro de Reclamaciones</h2>
+          <p>
+            Si registras una queja o reclamo, tratamos los datos de identificación,
+            contacto, descripción del servicio y contenido presentado para registrar,
+            atender y conservar la Hoja de Reclamación. Estos datos no se publican en
+            el reporte vehicular ni en enlaces compartibles.
+          </p>
           <h2>Solicitudes de privacidad</h2>
           <p>
             {env.PRIVACY_EMAIL ? (

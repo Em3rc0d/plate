@@ -27,6 +27,7 @@ export default async function Layout({
               <Link href="/admin/reports">Reportes</Link>
               <Link href="/admin/providers">Proveedores</Link>
               <Link href="/admin/providers/probe">Sonda</Link>
+              <Link href="/admin/claims">Reclamos</Link>
               <Link href="/admin/readiness">Preparación comercial</Link>
             </nav>
             {children}
