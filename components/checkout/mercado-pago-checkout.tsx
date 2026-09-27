@@ -318,16 +318,16 @@ export function MercadoPagoCheckout({
       <form id="mp-card-form" aria-busy={busy}>
         <label className="field">
           Número de tarjeta
-          <div id="mp-card-number" style={{ minHeight: 44 }} />
+          <div id="mp-card-number" className="mp-secure-field" />
         </label>
         <div className="two-col">
           <label className="field">
             Vencimiento
-            <div id="mp-expiration-date" style={{ minHeight: 44 }} />
+            <div id="mp-expiration-date" className="mp-secure-field" />
           </label>
           <label className="field">
             CVV
-            <div id="mp-security-code" style={{ minHeight: 44 }} />
+            <div id="mp-security-code" className="mp-secure-field" />
           </label>
         </div>
         <label className="field">
