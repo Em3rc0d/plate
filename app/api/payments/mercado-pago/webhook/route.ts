@@ -5,7 +5,6 @@ import {
   verifyMercadoPagoWebhook,
 } from "@/src/payments/mercado-pago";
 import { db, required } from "@/src/db/client";
-import { generateVehicleReport } from "@/src/vehicle/service";
 import { track } from "@/src/analytics";
 
 export const runtime = "nodejs";
@@ -36,6 +35,7 @@ export async function POST(req: Request) {
         provider: "mercadopago",
         source: "webhook",
       });
+      const { generateVehicleReport } = await import("@/src/vehicle/service");
       await generateVehicleReport({ plate: order.plate, orderId: order.id });
     }
 
