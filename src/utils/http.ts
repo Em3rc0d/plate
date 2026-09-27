@@ -15,7 +15,7 @@ export async function handle(fn: () => Promise<Response>) {
     const status =
       code === "PDF_EXPIRED"
         ? 410
-        : code === "UNAUTHORIZED"
+        : ["UNAUTHORIZED", "INVALID_SIGNATURE"].includes(code)
           ? 401
           : code === "FORBIDDEN"
             ? 403
@@ -25,11 +25,25 @@ export async function handle(fn: () => Promise<Response>) {
                 ? 429
                 : code.includes("NOT_CONFIGURED")
                   ? 503
-                  : code === "CONFLICT"
+                  : [
+                        "CONFLICT",
+                        "PAYMENT_METHOD_MISMATCH",
+                        "IDEMPOTENCY_CONFLICT",
+                        "PAYMENT_ALREADY_ACTIVE",
+                      ].includes(code)
                     ? 409
-                    : code === "INVALID_INPUT"
+                    : [
+                          "INVALID_INPUT",
+                          "INVALID_IDEMPOTENCY_KEY",
+                          "INVALID_TOKEN",
+                          "INVALID_INSTRUMENT",
+                        ].includes(code)
                       ? 400
-                      : 500;
+                      : ["PROVIDER_UNAVAILABLE", "PAYMENT_RESULT_UNKNOWN"].includes(
+                            code,
+                          )
+                        ? 503
+                        : 500;
     if (status === 500) capture("route_failure");
     return NextResponse.json(
       {
