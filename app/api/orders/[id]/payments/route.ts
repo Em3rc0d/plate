@@ -4,7 +4,6 @@ import { handle, sameOrigin } from "@/src/utils/http";
 import { customerOrder } from "@/src/orders/service";
 import { rateLimit } from "@/src/utils/rate-limit";
 import { createMercadoPagoPayment } from "@/src/payments/mercado-pago";
-import { generateVehicleReport } from "@/src/vehicle/service";
 import { track } from "@/src/analytics";
 
 export const runtime = "nodejs";
@@ -59,6 +58,7 @@ export async function POST(
         provider: "mercadopago",
         method: input.data.instrument.paymentMethodId,
       });
+      const { generateVehicleReport } = await import("@/src/vehicle/service");
       report = await generateVehicleReport({
         plate: order.plate,
         orderId: order.id,
