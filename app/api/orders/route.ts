@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       })
       .safeParse(await req.json());
     if (!input.success) throw new Error("INVALID_INPUT");
-    await rateLimit(req, "orders", 10);
+    await rateLimit(req, "orders", env.MERCADO_PAGO_LIVE_MODE ? 10 : 100);
     let plate: string;
     try {
       plate = normalizePlate(input.data.plate);
