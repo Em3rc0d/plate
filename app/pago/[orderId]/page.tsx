@@ -42,6 +42,22 @@ export default async function Page({
       .eq("order_id", orderId)
       .maybeSingle(),
   );
+  const latestPayment = mercadoPago
+    ? checked(
+        await db()
+          .from("payment_attempts")
+          .select("status,live_mode,provider_status")
+          .eq("order_id", orderId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      )
+    : null;
+  const paymentLocked =
+    latestPayment &&
+    ["CREATING", "PENDING", "APPROVED", "UNKNOWN"].includes(
+      latestPayment.status,
+    );
 
   return (
     <>
@@ -76,7 +92,17 @@ export default async function Page({
           {["PAYMENT_PENDING", "REJECTED"].includes(order.status) ? (
             <div className="card">
               {mercadoPago ? (
-                mercadoPagoConfigured ? (
+                paymentLocked ? (
+                  <>
+                    <p className="notice">
+                      {latestPayment.status === "APPROVED" &&
+                      latestPayment.live_mode === false
+                        ? "Pago TEST aprobado. No se ejecutó ninguna consulta pagada a Masitaprex."
+                        : "Este pedido ya tiene un intento de pago activo. No realices un segundo pago mientras Mercado Pago confirma el resultado."}
+                    </p>
+                    {latestPayment.status !== "APPROVED" && <StatusRefresh />}
+                  </>
+                ) : mercadoPagoConfigured ? (
                   <MercadoPagoCheckout
                     orderId={order.id}
                     publicKey={env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY}
