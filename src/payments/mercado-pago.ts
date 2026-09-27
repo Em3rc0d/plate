@@ -330,8 +330,17 @@ export async function createMercadoPagoPayment(
       },
     })) as { id?: string | number };
   } catch {
-    // Ambiguous by design: never POST again automatically.
-    throw new Error("PAYMENT_RESULT_UNKNOWN");
+    // Ambiguous by design: never POST again automatically. The same logical
+    // attempt can only be recovered by external_reference / provider GET.
+    return {
+      attemptId: attempt.id,
+      providerPaymentId: null,
+      status: "CREATING",
+      providerStatus: null,
+      liveMode: null,
+      shouldFulfill: false,
+      testMode: !env.MERCADO_PAGO_LIVE_MODE,
+    };
   }
 
   const providerId = String(created.id ?? "");
