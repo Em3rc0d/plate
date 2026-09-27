@@ -1,18 +1,27 @@
 import Link from "next/link";
 import {
-  CarFront,
-  FileText,
-  LockKeyhole,
-  Download,
   ArrowRight,
+  CarFront,
+  Database,
+  FileText,
+  History,
+  LockKeyhole,
+  SearchCheck,
+  ShieldCheck,
+  UserRound,
 } from "lucide-react";
-import { CoverageList } from "@/components/marketing/coverage-list";
+import { CoverageList, capabilityDescriptions } from "@/components/marketing/coverage-list";
 import { ReportPreview } from "@/components/marketing/report-preview";
 import { PageEvent } from "@/components/marketing/page-event";
 import { PlateForm } from "@/components/marketing/plate-form";
 import { Button } from "@/components/ui/button";
 import { env } from "@/src/config/env";
 import { offeringName } from "@/src/config/commercial";
+import {
+  capabilityLabels,
+  enabledCapabilities,
+  type Capability,
+} from "@/src/config/providers";
 
 const states = [
   ["VERIFIED", "Información verificada", "La fuente devolvió información."],
@@ -38,96 +47,195 @@ const states = [
     "El dato superó su periodo de vigencia para consulta y necesita actualizarse.",
   ],
 ];
+
+function FeatureIcon({ cap }: { cap: Capability }) {
+  if (cap === "IDENTITY") return <CarFront size={26} aria-hidden="true" />;
+  if (cap === "REGISTRY_CURRENT_OWNER")
+    return <UserRound size={26} aria-hidden="true" />;
+  if (cap === "REGISTRY_HISTORY") return <History size={26} aria-hidden="true" />;
+  if (cap === "RESTRICTIONS")
+    return <ShieldCheck size={26} aria-hidden="true" />;
+  return <FileText size={26} aria-hidden="true" />;
+}
+
 export default function Home() {
+  const capabilities = enabledCapabilities();
+  const heroRows = capabilities.slice(0, 5);
+
   return (
-    <main id="main">
+    <main id="main" className="visual-master-page">
       <PageEvent event="landing_view" />
-      <div className="wrap">
-        <section className="hero">
-          <div>
-            <p className="eyebrow">Antes de comprar un auto usado</p>
+
+      <section className="master-hero">
+        <div className="wrap master-hero-grid">
+          <div className="master-hero-copy">
+            <p className="master-kicker">INFORMACIÓN VEHICULAR EN PERÚ</p>
             <h1>
-              Revisa lo que dicen sus registros <span>antes de comprar.</span>
+              Antes de comprar un usado, revisa sus registros.
             </h1>
-            <p className="lead">
-              Ingresa la placa y recibe un reporte de la información disponible
-              en las fuentes habilitadas, con su origen, fecha y límites.
+            <p className="master-lead">
+              Consulta la información registral disponible del vehículo, con
+              fuente, fecha y límites claros antes de tomar una decisión.
             </p>
+
             <PlateForm />
-            <div className="hero-details">
+
+            <div className="master-price-line">
+              <strong>S/ {env.REPORT_PRICE_PEN.toFixed(2)}</strong>
+              <span>· Pago único</span>
+              <span>· Cobertura visible antes de pagar</span>
+            </div>
+
+            <div className="master-trust-row" aria-label="Señales de confianza">
               <span>
-                <strong>S/ {env.REPORT_PRICE_PEN.toFixed(2)}</strong> · Pago
-                único
+                <SearchCheck size={18} aria-hidden="true" />
+                Consulta antes de pagar
               </span>
-              <Link href="#cobertura">Ver qué incluye</Link>
+              <span>
+                <ShieldCheck size={18} aria-hidden="true" />
+                Pago con validación manual
+              </span>
+              <span>
+                <LockKeyhole size={18} aria-hidden="true" />
+                Datos sensibles enmascarados
+              </span>
             </div>
-            <p className="micro">No reemplaza una revisión mecánica.</p>
           </div>
-          <ReportPreview compact />
-        </section>
-        <div className="strip">
-          <span>
-            <CarFront size={19} aria-hidden="true" />
-            Consulta por placa
-          </span>
-          <span>
-            <FileText size={19} aria-hidden="true" />
-            Información con fuente y fecha
-          </span>
-          <span>
-            <LockKeyhole size={19} aria-hidden="true" />
-            Documentos personales enmascarados
-          </span>
-          <span>
-            <Download size={19} aria-hidden="true" />
-            Reporte web y PDF
-          </span>
+
+          <div className="master-hero-art" aria-label="Vista ilustrativa de PlacaClara">
+            <img
+              src="/placaclara-hero-master.webp"
+              alt=""
+              aria-hidden="true"
+            />
+            <div className="master-demo-badge">
+              DEMO VISUAL · DATOS FICTICIOS
+            </div>
+            <article className="master-paper" aria-label="Ejemplo ficticio del reporte">
+              <div className="master-paper-top">
+                <strong>PlacaClara</strong>
+                <span>Reporte vehicular · ejemplo</span>
+              </div>
+              <div className="master-paper-title">
+                <div>
+                  <span>PLACA FICTICIA</span>
+                  <strong>XYZ-753</strong>
+                </div>
+                <div className="master-paper-demo">EJEMPLO</div>
+              </div>
+              <p className="master-paper-vehicle">TOYOTA · COROLLA CROSS · 2022</p>
+              <div className="master-paper-rows">
+                {(heroRows.length
+                  ? heroRows
+                  : (["IDENTITY", "REGISTRY_CURRENT_OWNER", "RESTRICTIONS"] as Capability[])
+                ).map((cap) => (
+                  <div className="master-paper-row" key={cap}>
+                    <span>{capabilityLabels[cap]}</span>
+                    <strong>Según respuesta de la fuente</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="master-paper-note">
+                Campos y estados ilustrativos. La cobertura real depende de las
+                fuentes habilitadas.
+              </p>
+            </article>
+          </div>
         </div>
-        <section className="content" id="cobertura">
-          <div className="section-head">
-            <div>
-              <p className="eyebrow">Qué incluye</p>
-              <h2>
-                Los registros disponibles.
-                <br />
-                Sus límites, también.
-              </h2>
-            </div>
-            <p>
-              Estas son las consultas habilitadas. El reporte distingue la
-              información recibida de lo que no pudo comprobarse.
-            </p>
+      </section>
+
+      <section className="master-source-strip" id="fuentes">
+        <div className="wrap master-source-inner">
+          <p>COBERTURA HABILITADA:</p>
+          <div className="master-source-items">
+            {capabilities.length ? (
+              capabilities.slice(0, 5).map((cap) => (
+                <span key={cap}>{capabilityLabels[cap]}</span>
+              ))
+            ) : (
+              <span>Fuentes pendientes de configuración comercial</span>
+            )}
           </div>
-          <CoverageList detailed />
-        </section>
-        <section
-          className="content report-preview-section"
-          id="reporte-ejemplo"
-        >
+        </div>
+      </section>
+
+      <section className="master-includes" id="cobertura">
+        <div className="wrap">
+          <div className="master-section-heading">
+            <div>
+              <h2>Qué incluye tu reporte</h2>
+              <p>
+                Información clara y organizada para revisar mejor un vehículo
+                antes de comprar.
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="#reporte-ejemplo">Ver ejemplo de reporte</Link>
+            </Button>
+          </div>
+
+          {capabilities.length ? (
+            <div className="master-feature-grid">
+              {capabilities.slice(0, 6).map((cap) => (
+                <article className="master-feature-card" key={cap}>
+                  <FeatureIcon cap={cap} />
+                  <div>
+                    <h3>{capabilityLabels[cap]}</h3>
+                    <p>{capabilityDescriptions[cap].detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="master-feature-grid">
+              {[
+                ["Identidad del vehículo", "Marca, modelo, años y características cuando exista cobertura."],
+                ["Titularidad", "Información registral disponible, con datos personales enmascarados."],
+                ["Restricciones", "Datos registrales devueltos por la fuente habilitada."],
+              ].map(([title, detail], index) => (
+                <article className="master-feature-card master-feature-card-muted" key={title}>
+                  {[CarFront, UserRound, ShieldCheck].map((Icon, i) =>
+                    i === index ? <Icon key={title} size={26} aria-hidden="true" /> : null,
+                  )}
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="content report-preview-section" id="reporte-ejemplo">
+        <div className="wrap master-two-column">
           <div className="preview-intro">
-            <p className="eyebrow">Un documento para revisar</p>
+            <p className="eyebrow">UN DOCUMENTO PARA REVISAR</p>
             <h2>Así se ve el reporte.</h2>
             <p className="muted">
-              Cada sección muestra qué se obtuvo, de dónde viene y cuándo se
-              consultó. Puedes guardarlo en PDF y revisarlo al conversar con el
-              vendedor.
+              Cada sección muestra qué se obtuvo, de dónde viene, cuándo se
+              consultó y qué limitaciones tiene.
             </p>
             <p className="micro">
-              La muestra usa datos ficticios. Tu reporte reflejará la respuesta
-              de las fuentes para tu placa.
+              La muestra usa datos ficticios. Tu reporte real refleja únicamente
+              la respuesta de las fuentes habilitadas para tu placa.
             </p>
-            <Button asChild variant="outline">
+            <Button asChild>
               <Link href="/consulta">
                 Consultar mi placa <ArrowRight size={18} aria-hidden="true" />
               </Link>
             </Button>
           </div>
           <ReportPreview />
-        </section>
-        <section className="content" id="como-funciona">
+        </div>
+      </section>
+
+      <section className="content" id="como-funciona">
+        <div className="wrap">
           <div className="section-head">
             <div>
-              <p className="eyebrow">Cómo funciona</p>
+              <p className="eyebrow">CÓMO FUNCIONA</p>
               <h2>De la placa al reporte, en tres pasos.</h2>
             </div>
           </div>
@@ -138,12 +246,12 @@ export default function Home() {
                 "Consulta la disponibilidad para el vehículo que estás revisando.",
               ],
               [
-                "Revisa la cobertura y realiza el pago",
-                "Confirma el precio, paga con el medio habilitado y adjunta el comprobante. La validación es manual.",
+                "Revisa cobertura y paga",
+                "Confirma precio y cobertura antes de adjuntar tu comprobante.",
               ],
               [
                 "Recibe tu reporte",
-                "Después de validar el pago y consultar las fuentes, encontrarás el reporte y el PDF en la página de tu pedido.",
+                "Tras validar el pago, generamos el reporte con las fuentes habilitadas.",
               ],
             ].map(([title, text], i) => (
               <li key={title}>
@@ -155,10 +263,13 @@ export default function Home() {
               </li>
             ))}
           </ol>
-        </section>
-        <section className="content" id="transparencia">
+        </div>
+      </section>
+
+      <section className="content" id="transparencia">
+        <div className="wrap">
           <div className="transparency">
-            <p className="eyebrow">Claridad en cada consulta</p>
+            <p className="eyebrow">CLARIDAD EN CADA CONSULTA</p>
             <h2>Te mostramos también lo que no pudimos comprobar.</h2>
             <div className="state-guide">
               {states.map(([state, title, text]) => (
@@ -170,15 +281,18 @@ export default function Home() {
             </div>
             <p className="limitation">
               PlacaClara consolida información documental disponible. No
-              inspecciona el vehículo físicamente. Algunas fuentes tienen
-              cobertura geográfica o histórica limitada.
+              inspecciona el vehículo físicamente y no sustituye una
+              certificación registral.
             </p>
           </div>
-        </section>
-        <section className="content" id="precio">
+        </div>
+      </section>
+
+      <section className="content" id="precio">
+        <div className="wrap">
           <div className="purchase-sheet">
             <div>
-              <p className="eyebrow">Un reporte para una placa</p>
+              <p className="eyebrow">UN REPORTE PARA UNA PLACA</p>
               <h2>{offeringName()}</h2>
               <p className="muted">
                 Información documental para hacer mejores preguntas antes de
@@ -197,15 +311,14 @@ export default function Home() {
                   Consultar placa <ArrowRight size={18} aria-hidden="true" />
                 </Link>
               </Button>
-              <p className="micro">
-                Revisa disponibilidad antes de pagar. La entrega comienza
-                después de la validación manual del pago.
-              </p>
             </div>
           </div>
-        </section>
-        <section className="content faq">
-          <p className="eyebrow">Preguntas frecuentes</p>
+        </div>
+      </section>
+
+      <section className="content faq" id="preguntas">
+        <div className="wrap">
+          <p className="eyebrow">PREGUNTAS FRECUENTES</p>
           <h2>Antes de consultar</h2>
           {[
             [
@@ -214,19 +327,15 @@ export default function Home() {
             ],
             [
               "¿Cuándo recibiré el reporte?",
-              "Después de la validación manual del pago y la consulta a las fuentes. La entrega depende de su disponibilidad; no es inmediata.",
+              "Después de la validación manual del pago y la consulta a las fuentes habilitadas.",
             ],
             [
               "¿Qué ocurre si una fuente falla?",
-              "Si hay información útil, recibirás un reporte parcial claramente identificado. Si todas las fuentes fallan, el pedido pasa a resolución manual o devolución.",
-            ],
-            [
-              "¿Puedo compartir el reporte?",
-              "Usa el botón de enlace compartible para enviar una vista sin identidad del propietario. Mantén reservado el enlace privado completo.",
+              "La disponibilidad se refleja en el reporte. Una ausencia de respuesta no demuestra ausencia de antecedentes.",
             ],
             [
               "¿PlacaClara es una entidad oficial?",
-              "No. Es un servicio independiente de información documental, sin afiliación a las entidades mencionadas.",
+              "No. Es un servicio independiente de información documental.",
             ],
           ].map(([question, answer]) => (
             <details key={question}>
@@ -234,8 +343,8 @@ export default function Home() {
               <p>{answer}</p>
             </details>
           ))}
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
