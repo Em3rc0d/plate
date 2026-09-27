@@ -77,6 +77,16 @@ function assertConfigured() {
     throw new Error("MERCADO_PAGO_LIVE_CREDENTIAL_REQUIRED");
 }
 
+class MercadoPagoHttpError extends Error {
+  constructor(
+    readonly status: number,
+    readonly providerError: string | null,
+    readonly providerMessage: string | null,
+  ) {
+    super("PROVIDER_HTTP_ERROR");
+  }
+}
+
 async function providerRequest(
   path: string,
   init: { method?: "GET" | "POST"; body?: unknown; idempotencyKey?: string } = {},
@@ -107,12 +117,15 @@ async function providerRequest(
         error: payload?.error ?? null,
         message: payload?.message ?? null,
       });
-      throw new Error("PROVIDER_UNAVAILABLE");
+      throw new MercadoPagoHttpError(
+        response.status,
+        payload?.error ?? null,
+        payload?.message ?? null,
+      );
     }
     return payload as unknown;
   } catch (error) {
-    if (error instanceof Error && error.message === "PROVIDER_UNAVAILABLE")
-      throw error;
+    if (error instanceof MercadoPagoHttpError) throw error;
     console.error("mercadopago_transport_error", {
       path,
       name: error instanceof Error ? error.name : "unknown",
@@ -342,14 +355,38 @@ export async function createMercadoPagoPayment(
         installments: instrument.installments,
         ...(instrument.issuerId ? { issuer_id: instrument.issuerId } : {}),
         payer: {
-          email: env.MERCADO_PAGO_LIVE_MODE ? order.email : "test@testuser.com",
+          email: env.MERCADO_PAGO_LIVE_MODE
+            ? order.email
+            : "test_user_pe@testuser.com",
         },
         description: `Reporte vehicular PlacaClara ${order.plate}`,
         external_reference: attempt.id,
       },
     })) as { id?: string | number };
-  } catch {
-    // Ambiguous by design: never POST again automatically. The same logical
+  } catch (error) {
+    if (error instanceof MercadoPagoHttpError && error.status >= 400 && error.status < 500) {
+      await db()
+        .from("payment_attempts")
+        .update({
+          status: "REJECTED",
+          provider_status: error.providerError ?? "rejected",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attempt.id)
+        .eq("status", "CREATING");
+      return {
+        attemptId: attempt.id,
+        providerPaymentId: null,
+        status: "REJECTED",
+        providerStatus: error.providerError,
+        statusDetail: error.providerMessage ?? undefined,
+        liveMode: null,
+        shouldFulfill: false,
+        testMode: !env.MERCADO_PAGO_LIVE_MODE,
+      };
+    }
+
+    // Transport/5xx ambiguity: never POST again automatically. The same logical
     // attempt can only be recovered by external_reference / provider GET.
     return {
       attemptId: attempt.id,
