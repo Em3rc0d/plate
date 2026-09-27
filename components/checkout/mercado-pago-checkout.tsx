@@ -112,6 +112,7 @@ export function MercadoPagoCheckout({
   const [paymentLocked, setPaymentLocked] = useState(false);
   const [tokenDiagnostic, setTokenDiagnostic] = useState("");
   const [ready, setReady] = useState(false);
+  const [cardReady, setCardReady] = useState(method !== "MP_CARD");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -202,6 +203,7 @@ export function MercadoPagoCheckout({
   useEffect(() => {
     let mounted = true;
     let localCardForm: CardForm | null = null;
+    setCardReady(method !== "MP_CARD");
     loadSdk()
       .then(() => {
         if (!mounted || !window.MercadoPago) return;
@@ -230,6 +232,10 @@ export function MercadoPagoCheckout({
               placeholder: "Nombre del titular",
             },
             issuer: { id: "mp-issuer", placeholder: "Banco emisor" },
+            installments: {
+              id: "mp-installments",
+              placeholder: "Cuotas",
+            },
             identificationType: { id: "mp-identification-type" },
             identificationNumber: {
               id: "mp-identification-number",
@@ -239,8 +245,15 @@ export function MercadoPagoCheckout({
           },
           callbacks: {
             onFormMounted: (mountError: unknown) => {
-              if (mountError && mounted)
-                setError("No se pudo cargar el formulario seguro de tarjeta.");
+              if (!mounted) return;
+              if (mountError) {
+                setCardReady(false);
+                setError(
+                  "No se pudo montar el formulario seguro de tarjeta de Mercado Pago.",
+                );
+                return;
+              }
+              setCardReady(true);
             },
             onSubmit: async (event: Event) => {
               event.preventDefault();
@@ -269,7 +282,12 @@ export function MercadoPagoCheckout({
         cardForm.current = localCardForm;
       })
       .catch(() => {
-        if (mounted) setError("No se pudo cargar Mercado Pago.");
+        if (mounted) {
+          setCardReady(false);
+          setError(
+            "No se pudo cargar el SDK de Mercado Pago. Recarga la página e intenta nuevamente.",
+          );
+        }
       });
     return () => {
       mounted = false;
@@ -385,6 +403,9 @@ export function MercadoPagoCheckout({
         Mercado Pago y no pasan por nuestros servidores. El pago se procesa en
         una sola cuota.
       </p>
+      {!cardReady && !error && (
+        <p className="micro">Cargando formulario seguro de Mercado Pago…</p>
+      )}
       <form id="mp-card-form" aria-busy={busy}>
         <label className="field">
           Número de tarjeta
@@ -425,7 +446,16 @@ export function MercadoPagoCheckout({
           Emisor
           <select id="mp-issuer" required />
         </label>
-        <Button disabled={busy || !ready || paymentLocked}>
+        <select
+          id="mp-installments"
+          defaultValue="1"
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{ display: "none" }}
+        >
+          <option value="1">1</option>
+        </select>
+        <Button disabled={busy || !ready || !cardReady || paymentLocked}>
           {busy ? "Procesando…" : `Pagar S/ ${amount.toFixed(2)}`}
         </Button>
       </form>
