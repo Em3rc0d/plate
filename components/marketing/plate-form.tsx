@@ -1,17 +1,20 @@
 "use client";
+
 import { browserTrack } from "@/src/analytics/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { normalizePlate } from "@/src/vehicle/normalize-plate";
 import { Button } from "@/components/ui/button";
+
 export function PlateForm() {
   const [plate, setPlate] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
   return (
     <form
-      className="query"
+      className="query master-query"
       onSubmit={(e) => {
         e.preventDefault();
         try {
@@ -22,10 +25,14 @@ export function PlateForm() {
         }
       }}
     >
-      <label className="micro" htmlFor="plate">
-        PLACA DEL VEHÍCULO
+      <label className="sr-only" htmlFor="plate">
+        Placa del vehículo
       </label>
       <div className="query-bar">
+        <span className="plate-country" aria-hidden="true">
+          <i />
+          <small>PERÚ</small>
+        </span>
         <input
           id="plate"
           value={plate}
@@ -33,7 +40,7 @@ export function PlateForm() {
             setPlate(e.target.value);
             setError("");
           }}
-          placeholder="ABC-123"
+          placeholder="XYZ-753"
           maxLength={12}
           autoComplete="off"
           required
@@ -43,11 +50,11 @@ export function PlateForm() {
           aria-describedby={error ? "plate-hint plate-error" : "plate-hint"}
         />
         <Button type="submit">
-          Consultar placa <ArrowRight size={17} aria-hidden="true" />
+          Consultar placa <ArrowRight size={18} aria-hidden="true" />
         </Button>
       </div>
       <p id="plate-hint" className="hint">
-        Sin cuenta. Revisa la disponibilidad antes de pagar.
+        Ingresa una placa real para consultar disponibilidad. XYZ-753 es solo un ejemplo visual.
       </p>
       {error && (
         <p id="plate-error" role="alert" className="error">
