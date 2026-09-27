@@ -95,12 +95,12 @@ export default async function Page({
                 paymentLocked ? (
                   <>
                     <p className="notice">
-                      {latestPayment.status === "APPROVED" &&
-                      latestPayment.live_mode === false
+                      {latestPayment?.status === "APPROVED" &&
+                      latestPayment?.live_mode === false
                         ? "Pago TEST aprobado. No se ejecutó ninguna consulta pagada a Masitaprex."
                         : "Este pedido ya tiene un intento de pago activo. No realices un segundo pago mientras Mercado Pago confirma el resultado."}
                     </p>
-                    {latestPayment.status !== "APPROVED" && <StatusRefresh />}
+                    {latestPayment?.status !== "APPROVED" && <StatusRefresh />}
                   </>
                 ) : mercadoPagoConfigured ? (
                   <MercadoPagoCheckout
