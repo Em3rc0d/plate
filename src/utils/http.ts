@@ -4,7 +4,9 @@ import { env } from "@/src/config/env";
 import { capture } from "@/src/observability";
 export function sameOrigin(req: Request) {
   const origin = req.headers.get("origin");
-  if (origin !== new URL(env.NEXT_PUBLIC_SITE_URL).origin)
+  const requestOrigin = new URL(req.url).origin;
+  const configuredOrigin = new URL(env.NEXT_PUBLIC_SITE_URL).origin;
+  if (!origin || (origin !== requestOrigin && origin !== configuredOrigin))
     throw new Error("FORBIDDEN");
 }
 export async function handle(fn: () => Promise<Response>) {
