@@ -97,9 +97,26 @@ async function providerRequest(
       },
       ...(init.body ? { body: JSON.stringify(init.body) } : {}),
     });
-    if (!response.ok) throw new Error("PROVIDER_UNAVAILABLE");
-    return (await response.json()) as unknown;
-  } catch {
+    const payload = (await response.json().catch(() => null)) as
+      | { message?: string; error?: string; status?: number; cause?: unknown }
+      | null;
+    if (!response.ok) {
+      console.error("mercadopago_provider_error", {
+        path,
+        status: response.status,
+        error: payload?.error ?? null,
+        message: payload?.message ?? null,
+      });
+      throw new Error("PROVIDER_UNAVAILABLE");
+    }
+    return payload as unknown;
+  } catch (error) {
+    if (error instanceof Error && error.message === "PROVIDER_UNAVAILABLE")
+      throw error;
+    console.error("mercadopago_transport_error", {
+      path,
+      name: error instanceof Error ? error.name : "unknown",
+    });
     throw new Error("PROVIDER_UNAVAILABLE");
   }
 }
@@ -324,7 +341,9 @@ export async function createMercadoPagoPayment(
         payment_method_id: instrument.paymentMethodId,
         installments: instrument.installments,
         ...(instrument.issuerId ? { issuer_id: instrument.issuerId } : {}),
-        payer: { email: order.email },
+        payer: {
+          email: env.MERCADO_PAGO_LIVE_MODE ? order.email : "test@testuser.com",
+        },
         description: `Reporte vehicular PlacaClara ${order.plate}`,
         external_reference: attempt.id,
       },
