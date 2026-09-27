@@ -1,0 +1,80 @@
+import { upgradeReport } from "./upgrade";
+import "server-only";
+import { randomUUID } from "node:crypto";
+import { db, checked, required } from "@/src/db/client";
+import { env } from "@/src/config/env";
+import { generatePdf } from "./pdf-service";
+import { sendReport } from "@/src/email/report-ready";
+import { capture } from "@/src/observability";
+import type { ReportRow } from "@/src/vehicle/canonical";
+export async function deliverReport(
+  row: ReportRow,
+  email: string,
+  pdfOnly = false,
+) {
+  const id = randomUUID();
+  const claimed = checked(
+    await db().rpc("claim_delivery", {
+      p_id: row.id,
+      p_revision: row.revision,
+      p_token: id,
+    }),
+  );
+  if (!claimed) return { status: "DELIVERY_IN_PROGRESS" };
+  try {
+    row = required(
+      await db().from("reports").select("*").eq("id", row.id).single(),
+    ) as ReportRow;
+    row.report_json = upgradeReport(row.report_json);
+    try {
+      await generatePdf(row);
+    } catch (error) {
+      capture("pdf_failure", { report_id: row.id });
+      checked(
+        await db()
+          .from("reports")
+          .update({
+            pdf_status:
+              row.pdf_deleted_at ||
+              (error instanceof Error && error.message === "PDF_EXPIRED")
+                ? "EXPIRED"
+                : "FAILED",
+          })
+          .eq("id", row.id)
+          .eq("revision", row.revision),
+      );
+    }
+    if (!pdfOnly && row.email_status !== "SENT") {
+      let status: ReportRow["email_status"] = "NOT_CONFIGURED";
+      if (env.RESEND_API_KEY && env.REPORT_FROM_EMAIL) {
+        try {
+          await sendReport(row, email);
+          status = "SENT";
+        } catch {
+          capture("email_failure", { report_id: row.id });
+          status = "FAILED";
+        }
+      }
+      checked(
+        await db()
+          .from("reports")
+          .update({ email_status: status })
+          .eq("id", row.id)
+          .eq("revision", row.revision),
+      );
+    }
+    return { status: "DELIVERY_ATTEMPTED" };
+  } finally {
+    checked(
+      await db()
+        .from("reports")
+        .update({
+          delivery_token: null,
+          delivery_started_at: null,
+          delivery_attempted_at: new Date().toISOString(),
+        })
+        .eq("id", row.id)
+        .eq("delivery_token", id),
+    );
+  }
+}

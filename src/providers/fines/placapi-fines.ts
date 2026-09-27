@@ -1,0 +1,20 @@
+import { call } from "../http";
+import { env } from "@/src/config/env";
+export const fines = (plate: string, id: string | null) =>
+  call(
+    {
+      provider: "PlacApi",
+      endpoint: "https://placapi.com/api/multas-pe",
+      key: env.PLACAPI_API_KEY,
+      section: "fines",
+      source: "SUTRAN, SAT Lima y Callao vía PlacApi",
+      cost: env.PLACAPI_COST_PER_CREDIT_PEN,
+    },
+    plate,
+    id,
+  );
+
+import { providers } from "@/src/config/providers";
+export const capabilities = providers().find(
+  (p) => p.id === "fines",
+)!.capabilities;
