@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   CarFront,
@@ -103,9 +104,12 @@ export default function Home() {
           </div>
 
           <div className="master-hero-art" aria-label="Vista ilustrativa de PlacaClara">
-            <img
+            <Image
               src="/placaclara-hero-master.webp"
               alt=""
+              fill
+              priority
+              sizes="(max-width: 900px) 100vw, 49vw"
               aria-hidden="true"
             />
             <div className="master-demo-badge">
