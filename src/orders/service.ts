@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { db, checked, required } from "@/src/db/client";
 import { matchesToken, hash, token } from "@/src/utils/security";
-import { env } from "@/src/config/env";
+import { env, mercadoPagoConfigured } from "@/src/config/env";
 import { commercialReadiness } from "@/src/config/commercial";
 import type { OrderRow } from "@/src/vehicle/canonical";
 export async function customerOrder(id: string) {
@@ -18,14 +18,18 @@ export async function createOrder(input: {
   plate: string;
   email: string;
   phone: string;
-  method: "YAPE" | "PLIN";
+  method: "MP_YAPE" | "MP_CARD" | "YAPE" | "PLIN";
 }) {
   if (!commercialReadiness().ready)
     throw new Error("SERVICE_NOT_CONFIGURED");
-  const phone = input.method === "YAPE" ? env.YAPE_PHONE : env.PLIN_PHONE;
-  const name =
-    input.method === "YAPE" ? env.YAPE_DISPLAY_NAME : env.PLIN_DISPLAY_NAME;
-  if (!phone || !name) throw new Error("PAYMENT_NOT_CONFIGURED");
+  if (input.method.startsWith("MP_")) {
+    if (!mercadoPagoConfigured) throw new Error("PAYMENT_NOT_CONFIGURED");
+  } else {
+    const phone = input.method === "YAPE" ? env.YAPE_PHONE : env.PLIN_PHONE;
+    const name =
+      input.method === "YAPE" ? env.YAPE_DISPLAY_NAME : env.PLIN_DISPLAY_NAME;
+    if (!phone || !name) throw new Error("PAYMENT_NOT_CONFIGURED");
+  }
   const access = token();
   const order = required(
     await db()
