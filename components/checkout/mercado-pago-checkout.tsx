@@ -278,11 +278,10 @@ export function MercadoPagoCheckout({
             ? "no informado"
             : String(token.public_key === publicKey);
         setTokenDiagnostic(
-          `Token: live_mode=${String(token.live_mode ?? "no informado")}; site=${token.site_id === "MPE" ? "MPE" : "no confirmado"}; Public Key coincide=${sameKey}; marcador Yape=${token.cardholder?.name === "yape" ? "sí" : "no informado"}.`,
+          `Token Yape: live_mode=${String(token.live_mode ?? "no informado")} (informativo); site=${token.site_id === "MPE" ? "MPE" : "no confirmado"}; Public Key coincide=${sameKey}; marcador Yape=${token.cardholder?.name === "yape" ? "sí" : "no informado"}.`,
         );
       }
       if (
-        (testMode && token.live_mode === true) ||
         (token.public_key !== undefined && token.public_key !== publicKey) ||
         (token.site_id !== undefined && token.site_id !== "MPE")
       ) {
