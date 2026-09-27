@@ -1,5 +1,10 @@
 import "server-only";
-import { bookOfClaimsUrl, env, databaseConfigured } from "./env";
+import {
+  bookOfClaimsUrl,
+  env,
+  databaseConfigured,
+  mercadoPagoConfigured,
+} from "./env";
 import { commercialReadiness } from "./commercial";
 import { providers, supports } from "./providers";
 import { db } from "@/src/db/client";
@@ -32,6 +37,7 @@ export async function readiness(adminWorking: boolean) {
       db().from("orders").select("id,generation_token,terms_version").limit(1),
       db().from("reports").select("share_code,pdf_status,revision").limit(1),
       db().from("consumer_claims").select("id,claim_number,status").limit(1),
+      db().from("payment_attempts").select("id,status").limit(1),
       db().storage.getBucket("payment-proofs"),
       db().storage.getBucket("report-pdfs"),
       db().storage.from("payment-proofs").list("", { limit: 1 }),
@@ -42,12 +48,15 @@ export async function readiness(adminWorking: boolean) {
       .every((r) => r.status === "fulfilled" && !r.value.error);
     claims =
       results[2]?.status === "fulfilled" && !results[2].value.error;
+    const payments =
+      results[3]?.status === "fulfilled" && !results[3].value.error;
+    database = database && payments;
     storage =
       results
-        .slice(3)
+        .slice(4)
         .every((r) => r.status === "fulfilled" && !r.value.error) &&
       results
-        .slice(3, 5)
+        .slice(4, 6)
         .every(
           (r) =>
             r.status === "fulfilled" &&
@@ -58,7 +67,7 @@ export async function readiness(adminWorking: boolean) {
   }
   add("Infraestructura", "Supabase URL", !!env.NEXT_PUBLIC_SUPABASE_URL);
   add("Infraestructura", "Service role", !!env.SUPABASE_SERVICE_ROLE_KEY);
-  add("Infraestructura", "Base de datos y migración 2 accesibles", database);
+  add("Infraestructura", "Base de datos y migraciones accesibles", database);
   add(
     "Infraestructura",
     "Buckets privados y acceso de lectura",
@@ -108,9 +117,33 @@ export async function readiness(adminWorking: boolean) {
     );
   const yape = !!env.YAPE_DISPLAY_NAME && !!env.YAPE_PHONE,
     plin = !!env.PLIN_DISPLAY_NAME && !!env.PLIN_PHONE;
-  add("Pago", "Al menos un medio de pago", yape || plin);
-  add("Pago", "Yape", yape, true);
-  add("Pago", "Plin", plin, true);
+  add(
+    "Pago",
+    "Mercado Pago Checkout API",
+    mercadoPagoConfigured,
+    true,
+    mercadoPagoConfigured
+      ? env.MERCADO_PAGO_LIVE_MODE
+        ? "Credenciales LIVE configuradas. Requiere E2E real antes de abrir tráfico."
+        : "Configurado en TEST. Los pagos aprobados no disparan Masitaprex."
+      : "Configura Public Key, Access Token, Collector ID y Webhook Secret.",
+  );
+  add(
+    "Pago",
+    "Yape vía Mercado Pago",
+    mercadoPagoConfigured,
+    true,
+    "Tokenización con MercadoPago.js; payment_method_id=yape.",
+  );
+  add(
+    "Pago",
+    "Tarjeta vía Mercado Pago",
+    mercadoPagoConfigured,
+    true,
+    "CardForm seguro; PAN/CVV no pasan por PlacaClara.",
+  );
+  add("Pago", "Fallback manual Yape", yape, true);
+  add("Pago", "Fallback manual Plin", plin, true);
   add("Pago", "QR Yape", !!env.NEXT_PUBLIC_YAPE_QR_URL, true);
   add("Pago", "QR Plin", !!env.NEXT_PUBLIC_PLIN_QR_URL, true);
   add("Entrega", "Resend", !!env.RESEND_API_KEY, true);
