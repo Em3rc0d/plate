@@ -402,7 +402,7 @@ export async function createMercadoPagoPayment(
         payer: {
           email: env.MERCADO_PAGO_LIVE_MODE
             ? order.email
-            : "test_user_pe@testuser.com",
+            : "test@testuser.com",
         },
         description: `Reporte vehicular PlacaClara ${order.plate}`,
         external_reference: attempt.id,
