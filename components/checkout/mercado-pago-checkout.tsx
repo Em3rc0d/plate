@@ -438,7 +438,7 @@ export function MercadoPagoCheckout({
           <input
             id="mp-cardholder-email"
             type="email"
-            defaultValue={payerEmail}
+            defaultValue={testMode ? "test@testuser.com" : payerEmail}
             required
           />
         </label>
