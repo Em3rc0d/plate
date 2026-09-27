@@ -15,7 +15,7 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
       <div className="sample-identity">
         <div>
           <span className="document-label">PLACA DE EJEMPLO</span>
-          <div className="plate sample-plate">DEMO-000</div>
+          <div className="plate sample-plate">XYZ-753</div>
         </div>
         <div>
           <h3>
@@ -32,7 +32,7 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
       </div>
       {!compact && (
         <p className="sample-date">
-          Fecha ilustrativa del reporte: 26 sep. 2026 · 10:30 (Lima)
+          Fecha ilustrativa del reporte · datos ficticios
         </p>
       )}
       {examples.length ? (
@@ -62,7 +62,7 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
                   </div>
                   <div>
                     <dt>Consulta ilustrativa</dt>
-                    <dd>26 sep. 2026 · 10:28 (Lima)</dd>
+                    <dd>Fecha ficticia de demostración</dd>
                   </div>
                 </dl>
                 <p className="micro">
