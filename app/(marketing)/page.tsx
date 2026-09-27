@@ -115,35 +115,9 @@ export default function Home() {
             <div className="master-demo-badge">
               DEMO VISUAL · DATOS FICTICIOS
             </div>
-            <article className="master-paper" aria-label="Ejemplo ficticio del reporte">
-              <div className="master-paper-top">
-                <strong>PlacaClara</strong>
-                <span>Reporte vehicular · ejemplo</span>
-              </div>
-              <div className="master-paper-title">
-                <div>
-                  <span>PLACA FICTICIA</span>
-                  <strong>XYZ-753</strong>
-                </div>
-                <div className="master-paper-demo">EJEMPLO</div>
-              </div>
-              <p className="master-paper-vehicle">TOYOTA · COROLLA CROSS · 2022</p>
-              <div className="master-paper-rows">
-                {(heroRows.length
-                  ? heroRows
-                  : (["IDENTITY", "REGISTRY_CURRENT_OWNER", "RESTRICTIONS"] as Capability[])
-                ).map((cap) => (
-                  <div className="master-paper-row" key={cap}>
-                    <span>{capabilityLabels[cap]}</span>
-                    <strong>Según respuesta de la fuente</strong>
-                  </div>
-                ))}
-              </div>
-              <p className="master-paper-note">
-                Campos y estados ilustrativos. La cobertura real depende de las
-                fuentes habilitadas.
-              </p>
-            </article>
+            <p className="master-art-note">
+              Imagen ilustrativa. XYZ-753 y los datos visibles son ficticios y no representan una consulta real.
+            </p>
           </div>
         </div>
       </section>
