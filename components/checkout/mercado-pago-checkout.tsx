@@ -48,27 +48,48 @@ declare global {
 }
 
 let sdkPromise: Promise<void> | null = null;
+
 function loadSdk() {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.MercadoPago) return Promise.resolve();
   if (sdkPromise) return sdkPromise;
+
   sdkPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.getElementById("mercado-pago-sdk");
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error("SDK_ERROR")), {
-        once: true,
-      });
-      return;
-    }
+    const finish = () => {
+      if (window.MercadoPago) resolve();
+      else reject(new Error("SDK_NOT_AVAILABLE"));
+    };
+
+    const previous = document.getElementById("mercado-pago-sdk");
+    if (previous) previous.remove();
+
     const script = document.createElement("script");
     script.id = "mercado-pago-sdk";
     script.src = "https://sdk.mercadopago.com/js/v2";
     script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("SDK_ERROR"));
+    script.crossOrigin = "anonymous";
+
+    const timeout = window.setTimeout(() => {
+      script.remove();
+      reject(new Error("SDK_TIMEOUT"));
+    }, 12_000);
+
+    script.onload = () => {
+      window.clearTimeout(timeout);
+      finish();
+    };
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      script.remove();
+      reject(new Error("SDK_ERROR"));
+    };
     document.head.appendChild(script);
+  }).catch((error) => {
+    // A transient CDN/network failure must not poison every later checkout mount.
+    sdkPromise = null;
+    throw error;
   });
+
   return sdkPromise;
 }
 
