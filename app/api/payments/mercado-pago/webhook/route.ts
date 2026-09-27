@@ -4,7 +4,7 @@ import {
   syncMercadoPagoByProviderId,
   verifyMercadoPagoWebhook,
 } from "@/src/payments/mercado-pago";
-import { db, checked } from "@/src/db/client";
+import { db, required } from "@/src/db/client";
 import { generateVehicleReport } from "@/src/vehicle/service";
 import { track } from "@/src/analytics";
 
@@ -18,14 +18,14 @@ export async function POST(req: Request) {
     if (!payment) return NextResponse.json({ received: true, matched: false });
 
     if (payment.shouldFulfill) {
-      const attempt = checked(
+      const attempt = required(
         await db()
           .from("payment_attempts")
           .select("order_id")
           .eq("id", payment.attemptId)
           .single(),
       );
-      const order = checked(
+      const order = required(
         await db()
           .from("orders")
           .select("id,plate")
