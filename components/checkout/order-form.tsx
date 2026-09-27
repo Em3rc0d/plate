@@ -3,7 +3,7 @@ import { browserTrack } from "@/src/analytics/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 export function OrderForm({
   plate,
   enabled,
@@ -21,6 +21,7 @@ export function OrderForm({
   const router = useRouter();
   return (
     <form
+      aria-busy={busy}
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
@@ -90,9 +91,23 @@ export function OrderForm({
             Plin
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="YAPE">
+          <p className="micro">
+            {enabled.YAPE
+              ? "En el siguiente paso verás los datos para pagar con Yape y adjuntar tu comprobante."
+              : "Yape no está disponible para este pedido."}
+          </p>
+        </TabsContent>
+        <TabsContent value="PLIN">
+          <p className="micro">
+            {enabled.PLIN
+              ? "En el siguiente paso verás los datos para pagar con Plin y adjuntar tu comprobante."
+              : "Plin no está disponible para este pedido."}
+          </p>
+        </TabsContent>
       </Tabs>
       <label
-        className="flex"
+        className="flex checkout-consent"
         style={{ margin: "22px 0", alignItems: "flex-start", fontSize: 14 }}
       >
         <input type="checkbox" name="accepted" required />

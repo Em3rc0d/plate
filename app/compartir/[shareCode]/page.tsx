@@ -3,7 +3,7 @@ import { sharedReport } from "@/src/reports/repository";
 import { sanitizeSharedReport } from "@/src/reports/public-sanitizer";
 import { databaseConfigured } from "@/src/config/env";
 import { labels, productName, legalNotice } from "@/src/config/product";
-import { lines } from "@/src/reports/sections";
+import { lines, fieldLabels } from "@/src/reports/sections";
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false, follow: false } };
 export default async function Page({
@@ -30,15 +30,27 @@ export default async function Page({
             {r.modelYear ?? "No disponible"}
           </p>
           <p>
-            {labels[r.status]} · {r.generatedAt}
+            {labels[r.status]} · Emitido:{" "}
+            {new Date(r.generatedAt).toLocaleString("es-PE", {
+              timeZone: "America/Lima",
+            })}{" "}
+            (Lima)
           </p>
         </header>
         {[
-          { title: "SOAT", value: r.insurance },
-          { title: "CITV", value: r.inspection },
-          { title: "Papeletas en la cobertura consultada", value: r.fines },
-          { title: "Restricciones devueltas", value: r.restrictions },
-        ].map(({ title, value }) => (
+          { key: "insurance", title: "SOAT", value: r.insurance },
+          { key: "inspection", title: "Revisión técnica", value: r.inspection },
+          {
+            key: "fines",
+            title: "Papeletas en la cobertura consultada",
+            value: r.fines,
+          },
+          {
+            key: "registry.restrictions",
+            title: "Restricciones devueltas",
+            value: r.restrictions,
+          },
+        ].map(({ key, title, value }) => (
           <section className="card" key={title}>
             <h2>{title}</h2>
             <span className={`status ${value.status}`}>
@@ -47,6 +59,25 @@ export default async function Page({
             {lines(value).map((line, i) => (
               <p key={i}>{line}</p>
             ))}
+            <div className="evidence">
+              {r.sources
+                .filter(
+                  (source) =>
+                    source.section === key ||
+                    source.section.startsWith(key + "."),
+                )
+                .map((source, i) => (
+                  <p key={i}>
+                    Fuente: {source.provider}
+                    <br />
+                    Consultado:{" "}
+                    {new Date(source.checkedAt).toLocaleString("es-PE", {
+                      timeZone: "America/Lima",
+                    })}{" "}
+                    (Lima)
+                  </p>
+                ))}
+            </div>
             {value.status === "NOT_FOUND" && (
               <p>
                 0 registros devueltos en la cobertura consultada. No acredita
@@ -87,7 +118,13 @@ export default async function Page({
           <h2>Fuentes y cobertura</h2>
           {r.sources.map((s, i) => (
             <p key={i}>
-              {s.section} · {s.provider} · {labels[s.status]} · {s.checkedAt}
+              {fieldLabels[s.section.split(".").at(-1) || ""] ||
+                "Información documental"}{" "}
+              · Fuente: {s.provider} · {labels[s.status]} ·{" "}
+              {new Date(s.checkedAt).toLocaleString("es-PE", {
+                timeZone: "America/Lima",
+              })}{" "}
+              (Lima)
             </p>
           ))}
           <p>Papeletas: SUTRAN, Lima y Callao; no todas las municipalidades.</p>

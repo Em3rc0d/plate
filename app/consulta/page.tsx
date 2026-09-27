@@ -1,4 +1,6 @@
 import { Header, Footer } from "@/components/marketing/shell";
+import { commercialReadiness } from "@/src/config/commercial";
+import { coverageLabels } from "@/src/config/providers";
 import { Preview } from "@/components/checkout/preview";
 export default async function Page({
   searchParams,
@@ -14,10 +16,13 @@ export default async function Page({
           <p className="eyebrow">01 / Consulta</p>
           <h1>Empecemos por tu placa.</h1>
           <p className="muted">
-            Verifica la información básica disponible antes de continuar al
-            pago.
+            Revisa la disponibilidad y la cobertura del reporte antes de pagar.
           </p>
-          <Preview initial={(plate || "").slice(0, 12)} />
+          <Preview
+            initial={(plate || "").slice(0, 12)}
+            ready={commercialReadiness().ready}
+            coverage={coverageLabels()}
+          />
         </div>
       </main>
       <Footer />

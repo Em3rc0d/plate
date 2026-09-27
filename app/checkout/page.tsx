@@ -2,7 +2,7 @@ import { CoverageList } from "@/components/marketing/coverage-list";
 import { Header, Footer } from "@/components/marketing/shell";
 import { OrderForm } from "@/components/checkout/order-form";
 import { env } from "@/src/config/env";
-import { offeringName, offeringScopeNote } from "@/src/config/commercial";
+import { offeringName } from "@/src/config/commercial";
 import { commercialReadiness } from "@/src/config/commercial";
 import { normalizePlate } from "@/src/vehicle/normalize-plate";
 import { redirect } from "next/navigation";
@@ -23,15 +23,19 @@ export default async function Page({
       <Header />
       <main id="main" className="wrap page">
         <p className="eyebrow">02 / Tu pedido</p>
-        <h1>Un paso más para conocer el historial.</h1>
+        <h1>Revisa tu reporte antes de pagar.</h1>
         <div className="two-col">
-          <aside className="card">
+          <aside className="card checkout-summary">
             <div className="plate">{plate}</div>
             <h2>{offeringName()}</h2>
-            <p className="micro">{offeringScopeNote()}</p>
+            <p className="micro">
+              Información documental de las fuentes habilitadas, con fecha y
+              limitaciones.
+            </p>
             <div className="price">
               <small>S/</small> {env.REPORT_PRICE_PEN.toFixed(2)}
             </div>
+            <p className="muted">Pago único por esta placa.</p>
             <CoverageList />
             <p className="notice">
               Validación manual del pago. La entrega comienza después de aprobar

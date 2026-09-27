@@ -34,10 +34,28 @@ export default async function Page({
         <div className="narrow" style={{ overflowWrap: "anywhere" }}>
           <p className="eyebrow">03 / Pago y entrega</p>
           <h1>{labels[order.status]}</h1>
-          <p className="muted">
-            Pedido {order.id} · Placa {order.plate} · S/{" "}
-            {Number(order.amount_pen).toFixed(2)} · {order.payment_method}
-          </p>
+          <dl className="order-details">
+            <div>
+              <dt>Placa</dt>
+              <dd>{order.plate}</dd>
+            </div>
+            <div>
+              <dt>Precio del reporte</dt>
+              <dd>S/ {Number(order.amount_pen).toFixed(2)}</dd>
+            </div>
+            <div>
+              <dt>Medio de pago</dt>
+              <dd>{order.payment_method}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>{labels[order.status]}</dd>
+            </div>
+            <div className="order-reference">
+              <dt>Número de pedido</dt>
+              <dd>{order.id}</dd>
+            </div>
+          </dl>
           {["PAYMENT_PENDING", "REJECTED"].includes(order.status) ? (
             <div className="card">
               <h2>

@@ -29,22 +29,28 @@ export function PlateForm() {
         <input
           id="plate"
           value={plate}
-          onChange={(e) => setPlate(e.target.value)}
+          onChange={(e) => {
+            setPlate(e.target.value);
+            setError("");
+          }}
           placeholder="ABC-123"
           maxLength={12}
           autoComplete="off"
           required
-          aria-describedby="plate-hint"
+          autoCapitalize="characters"
+          spellCheck={false}
+          aria-invalid={!!error}
+          aria-describedby={error ? "plate-hint plate-error" : "plate-hint"}
         />
         <Button type="submit">
-          Consultar placa <ArrowRight size={17} />
+          Consultar placa <ArrowRight size={17} aria-hidden="true" />
         </Button>
       </div>
       <p id="plate-hint" className="hint">
         Sin cuenta. Revisa la disponibilidad antes de pagar.
       </p>
       {error && (
-        <p role="alert" className="error">
+        <p id="plate-error" role="alert" className="error">
           {error}
         </p>
       )}

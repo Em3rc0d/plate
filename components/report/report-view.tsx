@@ -3,7 +3,7 @@ import { summarySchema } from "@/src/findings/ai-summary";
 import { PageEvent } from "@/components/marketing/page-event";
 import { labels, legalNotice, productName } from "@/src/config/product";
 import type { ReportRow } from "@/src/vehicle/canonical";
-import { lines, reportSections } from "@/src/reports/sections";
+import { lines, reportSections, fieldLabels } from "@/src/reports/sections";
 import Link from "next/link";
 import { ShareButton } from "./share-button";
 export function ReportView({ row }: { row: ReportRow }) {
@@ -91,6 +91,16 @@ export function ReportView({ row }: { row: ReportRow }) {
           return (
             <section className="card" key={section.key}>
               <h2>{section.title}</h2>
+              <div
+                className="section-statuses"
+                aria-label="Estados de la evidencia"
+              >
+                {[...new Set(traces.map((e) => e.status))].map((status) => (
+                  <span key={status} className={`status ${status}`}>
+                    {labels[status]}
+                  </span>
+                ))}
+              </div>
               {available ? (
                 <div className="facts">
                   {lines(section.value).map((line, i) => (
@@ -105,6 +115,24 @@ export function ReportView({ row }: { row: ReportRow }) {
                   acredita ausencia de registros.
                 </p>
               )}
+              <div className="evidence">
+                {traces.map((e, i) => (
+                  <p key={i}>
+                    <span className={`status ${e.status}`}>
+                      {labels[e.status]}
+                    </span>{" "}
+                    {fieldLabels[e.fieldPath.split(".").at(-1) || ""] ||
+                      section.title}{" "}
+                    · Fuente: {e.originalSource}
+                    <br />
+                    Consultado:{" "}
+                    {new Date(e.checkedAt).toLocaleString("es-PE", {
+                      timeZone: "America/Lima",
+                    })}{" "}
+                    (Lima)
+                  </p>
+                ))}
+              </div>
               {traces.some((e) => e.status === "NOT_FOUND") && (
                 <p>La fuente no devolvió registros para esta sección.</p>
               )}
@@ -121,22 +149,10 @@ export function ReportView({ row }: { row: ReportRow }) {
                   el conflicto.
                 </p>
               )}
-              <div className="evidence">
-                {traces.map((e, i) => (
-                  <p key={i}>
-                    <span className={`status ${e.status}`}>
-                      {labels[e.status]}
-                    </span>{" "}
-                    {e.fieldPath} · {e.originalSource}
-                    <br />
-                    Consultado:{" "}
-                    {new Date(e.checkedAt).toLocaleString("es-PE", {
-                      timeZone: "America/Lima",
-                    })}{" "}
-                    (Lima)
-                  </p>
-                ))}
-              </div>
+              <p className="muted section-limit">
+                La información corresponde a la cobertura y fecha de la fuente.
+                No certifica ausencia de antecedentes fuera de ella.
+              </p>
             </section>
           );
         })}

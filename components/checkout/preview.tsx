@@ -11,7 +11,15 @@ interface PreviewData {
   price: number;
   availableSources: Record<string, boolean>;
 }
-export function Preview({ initial }: { initial: string }) {
+export function Preview({
+  initial,
+  ready,
+  coverage,
+}: {
+  initial: string;
+  ready: boolean;
+  coverage: string[];
+}) {
   const [plate, setPlate] = useState(initial),
     [result, setResult] = useState<PreviewData | null>(null),
     [busy, setBusy] = useState(false),
@@ -43,10 +51,16 @@ export function Preview({ initial }: { initial: string }) {
   }
   return (
     <>
-      <form onSubmit={run}>
+      <form onSubmit={run} aria-busy={busy}>
         <label className="field">
           Placa
           <input
+            className="plate-input"
+            autoCapitalize="characters"
+            autoComplete="off"
+            spellCheck={false}
+            aria-invalid={!!error}
+            aria-describedby={error ? "preview-error" : undefined}
             value={plate}
             maxLength={12}
             onChange={(e) => setPlate(e.target.value)}
@@ -59,38 +73,51 @@ export function Preview({ initial }: { initial: string }) {
         </Button>
       </form>
       {error && (
-        <p role="alert" className="error">
+        <p id="preview-error" role="alert" className="error">
           {error}
         </p>
       )}
-      {result && (
-        <article className="card" style={{ marginTop: 24 }}>
-          <div className="plate">{result.plate}</div>
-          <h2>
-            {[result.brand, result.model].filter(Boolean).join(" ") ||
-              "Placa normalizada"}
-          </h2>
-          <p className="muted">{labels[result.status] || result.status}</p>
-          <p>
-            Las fuentes de este reporte{" "}
-            {Object.values(result.availableSources).some(Boolean)
-              ? "están disponibles para consulta, sujetas a su respuesta."
-              : "aún no están habilitadas para consulta."}
-          </p>
-          {Object.values(result.availableSources).some(Boolean) ? (
-            <Button asChild>
-              <Link href={`/checkout?plate=${result.plate}`}>
-                Obtener reporte — S/{result.price.toFixed(2)}
-              </Link>
-            </Button>
-          ) : (
-            <p className="notice">
-              La compra todavía no está disponible. No se ha realizado ningún
-              cobro.
+      <div aria-live="polite" aria-atomic="true">
+        {busy && <p className="hint">Revisando disponibilidad…</p>}
+        {result && (
+          <article className="card" style={{ marginTop: 24 }}>
+            <div className="plate">{result.plate}</div>
+            <h2>
+              {[result.brand, result.model].filter(Boolean).join(" ") ||
+                "Placa normalizada"}
+            </h2>
+            <p className="muted">{labels[result.status] || result.status}</p>
+            <p>
+              Las fuentes de este reporte{" "}
+              {Object.values(result.availableSources).some(Boolean)
+                ? "están disponibles para consulta, sujetas a su respuesta."
+                : "aún no están habilitadas para consulta."}
             </p>
-          )}
-        </article>
-      )}
+            <h3>Cobertura del reporte</h3>
+            <ul className="coverage-items">
+              {coverage.map((label) => (
+                <li key={label}>{label}</li>
+              ))}
+            </ul>
+            <p className="micro">
+              La disponibilidad no garantiza registros para esta placa. No
+              reemplaza una revisión mecánica.
+            </p>
+            {ready && Object.values(result.availableSources).some(Boolean) ? (
+              <Button asChild>
+                <Link href={`/checkout?plate=${result.plate}`}>
+                  Obtener reporte — S/{result.price.toFixed(2)}
+                </Link>
+              </Button>
+            ) : (
+              <p className="notice">
+                La compra todavía no está disponible. No se ha realizado ningún
+                cobro.
+              </p>
+            )}
+          </article>
+        )}
+      </div>
     </>
   );
 }

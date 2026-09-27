@@ -1,6 +1,6 @@
 import { env } from "@/src/config/env";
 import Link from "next/link";
-import { ScanLine } from "lucide-react";
+import { CarFront } from "lucide-react";
 import { productName, legalNotice } from "@/src/config/product";
 import { Button } from "@/components/ui/button";
 export function Header() {
@@ -8,14 +8,16 @@ export function Header() {
     <header className="wrap nav">
       <Link className="brand" href="/">
         <span className="brand-icon">
-          <ScanLine size={22} />
+          <CarFront size={24} aria-hidden="true" />
         </span>
         {productName}
       </Link>
       <nav className="nav-links" aria-label="Principal">
         <Link href="/#cobertura">Qué incluye</Link>
         <Link href="/#como-funciona">Cómo funciona</Link>
-        <Link href="/#precio">Precio</Link>
+        <Link className="mobile-price" href="/#precio">
+          Precio
+        </Link>
         <Button asChild variant="outline">
           <Link href="/consulta">Consultar placa</Link>
         </Button>
@@ -27,7 +29,12 @@ export function Footer() {
   return (
     <footer className="wrap footer">
       <div className="footer-top">
-        <span>{productName} · Perú</span>
+        <div>
+          <strong>{productName} · Perú</strong>
+          <p className="footer-tagline">
+            La información del auto, clara antes de comprar.
+          </p>
+        </div>
         <div className="flex">
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/terminos">Términos</Link>
@@ -44,6 +51,12 @@ export function Footer() {
         <p>
           {env.BUSINESS_LEGAL_NAME}
           {env.BUSINESS_RUC ? ` · RUC ${env.BUSINESS_RUC}` : ""}
+        </p>
+      )}
+      {env.SUPPORT_EMAIL && (
+        <p>
+          Soporte:{" "}
+          <a href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a>
         </p>
       )}
       <p>{legalNotice}</p>

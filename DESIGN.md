@@ -1,68 +1,71 @@
-# Vehicle Intelligence PE — sistema de diseño
+# PlacaClara — sistema visual v0.3
 
-## Provenance
+## Auditoría y procedencia
 
-OFFICIAL: requisitos del brief aportado por el usuario; no significa afiliación gubernamental.
-OBSERVED: contratos públicos consultados de PlacApi y Masitaprex; no son llamadas reales autenticadas.
-INFERRED: separación de acceso al pedido y reporte, bloqueo de compra sin servicios esenciales.
-GENERATED: composición de landing, componentes, escalas y reglas de interfaz.
+OBSERVED: v0.2 usa fondo #0B0F14, acento menta, ficha inclinada con sombra, icono de escaneo y terminología de configuración en páginas públicas. La cobertura ya deriva de `src/config/providers.ts`; checkout usa `commercialReadiness`; la vista compartida pasa por `sanitizeSharedReport`.
 
-## Promesa OFFICIAL
+OFFICIAL: brief Trust / Automotive Redesign Pass. Promesa: «La información del auto, clara antes de comprar». Servicio documental peruano, sin afiliación oficial, inspección mecánica ni recomendación de compra.
 
-Consulta una placa y consolida la información registral, administrativa y documental disponible para revisar un vehículo usado antes de comprarlo.
+GENERATED (confianza alta respecto al brief): tokens, composición documental y componentes de esta versión. INFERRED (confianza media, pendiente de usuarios): placa y precio cerca de la primera acción, muestra documental antes de compra y transparencia como argumentos de confianza. No se afirma haber validado comprensión en cinco segundos.
 
-## Dirección GENERATED
+## Personalidad y composición
 
-Inteligencia documental automotriz sobria. Landing oscura con tipografía protagonista y una ficha estructural de reporte claramente ilustrativa, sin datos vehiculares inventados. Reporte claro y legible al imprimir. Sin logos oficiales, badges de alianza, contadores ficticios ni puntajes de riesgo.
+Clara, práctica, local, documental y profesional. Base clara; marca tipográfica con icono de automóvil; placa con borde y números tabulares; encabezados y filas de documento. El hero contesta qué consultar, qué recibir y sus límites. Una muestra compacta en el hero y una muestra detallada antes del precio. No fotografías decorativas ni servicios externos.
 
-## Tokens OFFICIAL
+## Tokens GENERATED
 
-| Token         | Valor                 |
-| ------------- | --------------------- |
-| bg            | #0B0F14               |
-| surface       | #111821               |
-| surface-2     | #17212B               |
-| border        | rgba(255,255,255,.10) |
-| text          | #F4F7FA               |
-| muted         | #93A1AF               |
-| accent        | #6EE7C7               |
-| accent-strong | #35CFA7               |
-| warning       | #F3C969               |
-| danger        | #F18484               |
-| report-bg     | #F7F8FA               |
-| report-card   | #FFFFFF               |
-| report-text   | #111827               |
+| Token CSS        | Valor   | Uso                              |
+| ---------------- | ------- | -------------------------------- |
+| --bg             | #F6F7F5 | Papel de fondo                   |
+| --surface        | #FFFFFF | Formularios y documentos         |
+| --surface-2      | #EDF1F0 | Transparencia y notas            |
+| --border         | #D4DDDC | Separadores decorativos          |
+| --control-border | #788984 | Bordes de controles              |
+| --text           | #192D35 | Texto principal                  |
+| --muted          | #53646B | Texto secundario                 |
+| --accent         | #155C58 | Marca, enlaces y botón principal |
+| --accent-strong  | #104843 | Hover                            |
+| --success        | #226348 | Información devuelta             |
+| --warning        | #80550D | Revisar / desactualizado         |
+| --danger         | #A33131 | Conflicto o error real           |
+| --report-bg      | #F6F7F5 | Fondo de reporte                 |
+| --report-card    | #FFFFFF | Hoja                             |
+| --report-text    | #192D35 | Texto de reporte                 |
 
-Tipografía sistema Arial/Helvetica/sans; sin dependencia de descarga de fuente. Números tabulares en placa, precio y métricas. Cuerpo 16px; formularios 14px; metadatos 12–13px. Títulos 36–62px desktop, 30–46px móvil. Espaciado 4/8/12/16/24/32/48/64; cards 12px, controles 10px.
+Texto de botón blanco sobre teal oscuro. Estados siempre con texto: verde sobre #EAF3ED; neutro sobre #EEF2F4; ámbar sobre #FFF3D9; rojo sobre #FBECEC. Ningún estado depende exclusivamente del color. Contraste AA para texto normal y foco perceptible; controles con borde más oscuro que separadores.
 
-## Componentes GENERATED
+## Tipografía, espacios y responsive
 
-Button con variante primary/outline/ghost y composición Slot (patrón shadcn). Tabs accesibles Radix para Yape/Plin. Formularios HTML semánticos con labels, errores role=alert y estados de procesamiento. Tabla administrativa desplazable horizontalmente. Details/summary para FAQ. Evidencia con texto de estado además de color.
+Arial/Helvetica/sans-serif del sistema, sin descargas. Cuerpo 16px/1.6, etiquetas 14px, metadatos 13px/1.6. H1 36–54px y 32–40px en móvil; H2 28–36px. Placas monoespaciadas y precios tabulares. Espaciado 4/8/12/16/24/32/48/64/80. Radios 6px controles, 8px documentos. Ancho máximo 1160px, reporte 1000px, formulario 620px. Breakpoints 800px y 420px. Controles >=48px; enlaces de navegación >=44px. Grillas a una columna; filas flexibles; palabras largas se parten; nada depende del hover. A 320px y zoom de texto 200%, sin recorte horizontal.
 
-## Responsive y accesibilidad GENERATED
+## Componentes
 
-Ancho máximo 1160px; reporte 1000px; formularios aislados 620px. A 800px hero, cards y checkout pasan a una columna. Padding móvil 16px. Controles táctiles >=48px. Skip link, foco visible, navegación con teclado, etiquetas explícitas, inputs semánticos, contraste y estados sin depender solo del color. Reduce motion elimina transiciones y scroll suave. Reporte imprime sin botones ni navegación. Evitar esconder contenido crítico detrás de hover.
+- Shell: cabecera clara; navegación sencilla; precio accesible también en móvil; footer con identidad legal, RUC, soporte y reclamaciones solo si están configurados. Sin identidad ficticia.
+- PlateForm: etiqueta visible, entrada prominente, errores asociados, CTA «Consultar placa»; no cobro al consultar.
+- CoverageList: capacidades de providers.ts, con descripción de qué se revisa, qué se ve y limitación; versión compacta para checkout. No anunciar capacidades no habilitadas.
+- ReportPreview: server component, datos sintéticos fijos, placa DEMO-000 no consultable, sin personas. Estado/fuente/fecha explícitamente ilustrativos. Si no hay fuentes, mostrar muestra de formato sin resultados ni coberturas prometidas. No realizar consultas.
+- Precio: un producto, precio de env, pago único, cobertura real. Sin tiers, descuentos o suscripción.
+- Checkout: placa/producto/precio/cobertura/contacto/método. Conservar payloads, consentimiento, rutas y bloqueo de commercialReadiness.
+- Reporte: título → estados observados → valores → fuente → fecha → limitaciones. No agregar estados resumidos que oculten discrepancias. Vista compartida usa exclusivamente el resultado saneado existente.
+- Accesibilidad: skip link, labels, foco, aria-invalid/describedby, anuncios de carga y resultado, details semántico, reduced motion. Impresión sin acciones, con evidencia visible.
 
-## Estados OFFICIAL
+## Estados OFFICIAL (sin cambios de semántica)
 
-VERIFIED: dato devuelto. NOT_FOUND: cero resultados de la fuente consultada. UNAVAILABLE: consulta/campo no obtenido. NOT_CONFIGURED: fuente no habilitada. STALE: frescura vencida. CONFLICT: evidencia incompatible. No convertir ausencia de respuesta en ausencia de deuda. No ofrecer “compra segura” ni “sin accidentes”.
+| Código         | Descripción pública                        | Color           |
+| -------------- | ------------------------------------------ | --------------- |
+| VERIFIED       | La fuente devolvió información             | Verde apagado   |
+| NOT_FOUND      | La fuente consultada no devolvió registros | Neutro          |
+| UNAVAILABLE    | La información no pudo obtenerse           | Neutro          |
+| NOT_CONFIGURED | Fuente no habilitada                       | Neutro          |
+| STALE          | Información desactualizada                 | Ámbar           |
+| CONFLICT       | Datos que no coinciden                     | Rojo controlado |
 
-## UX INFERRED
+No transformar NOT_FOUND en inexistencia de antecedentes. No usar verde para cobertura ausente. La verificación describe una respuesta documental, nunca la seguridad del vehículo.
 
-Consultar no cobra. Checkout no acepta compra sin DB, proveedor y medio de pago; el correo de entrega es opcional. Comprobante aprobado solo tras confirmar abono real. Pedido fallido dice resolución manual/devolución y no invita a pagar otra vez. La acción de compartir crea una vista separada sin identidad; el enlace privado se describe como secreto. Limitaciones visibles antes y después de la compra.
+## Patrones prohibidos
 
-## Versionado
+Fondos negros dominantes, glow, glassmorphism, gradientes AI, fichas flotantes/inclinadas, escáneres, animaciones en bucle, scores, porcentajes de riesgo, verdictos de compra, logos oficiales, contadores ficticios o garantías de cobertura universal. Movimiento limitado a color/foco/feedback; reduced motion elimina animación y scroll suave.
 
-V0.1: tokens en app/globals.css; componentes bajo components/. Cualquier cambio de estado o vocabulario debe reflejarse en labels, web, PDF y este documento. No hay suite de regresión visual por instrucción del brief.
+## Invariantes y validación
 
-## V0.2 — cierre operativo GENERATED / INFERRED
-
-Se conserva composición, tokens y responsive. CoverageList deriva ofertas de capacidades habilitadas. Sin fuente no se anuncia robo/captura/siniestros/GNV/valorización. El reporte muestra estas secciones con NOT_CONFIGURED y texto explícito, nunca verde.
-
-Resumen: verificaciones por sección, hallazgos y secciones con cobertura parcial/no disponible. Etiqueta documental derivada de evidencia, sin score. Propietarios ambiguos no muestran un conteo exacto. NOT_FOUND no se traduce en inexistencia.
-
-Pago: ID completo, placa, monto, método y estado siempre visibles. Se evita prometer correo sin configuración; el pedido puede actualizarse en pantalla sin nuevas llamadas a proveedores. Consentimiento requerido sin marketing preseleccionado, con links a políticas y persistencia de versiones.
-
-Admin: botón de recuperación solo para fallidos/pagados sin reporte o intentos vencidos; edad visible. Reenviar entrega y reintentar PDF están separados de actualizar fuentes. Actualizar fuentes advierte consumo de saldo. Readiness usa READY/OPTIONAL/BLOCKER en texto. Retención muestra elegibilidad antes de una ejecución explícita.
-
-Vista compartible sin nombres, documentos, direcciones, email, teléfono, pago, metadatos de titularidad ni resumen libre de IA. La vista privada conserva el botón para crear/copiar ese enlace, nunca copia accidentalmente la URL privada.
+No modificar backend, migraciones, contratos, pagos, privacidad, retención, router, PDF ni variables de producción. Sin nuevas dependencias. Proveedores opcionales continúan apagados salvo configuración existente. Validar lint/typecheck/build y navegación responsive local. La comprobación visual no sustituye una prueba de comprensión con compradores reales. Versionar tokens y reglas junto a sus componentes.
