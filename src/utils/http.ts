@@ -25,7 +25,11 @@ export async function handle(fn: () => Promise<Response>) {
               ? 404
               : code === "RATE_LIMIT"
                 ? 429
-                : code.includes("NOT_CONFIGURED")
+                : code.includes("NOT_CONFIGURED") ||
+                    [
+                      "PAYMENT_TEST_MODE_BLOCKED",
+                      "PROVIDER_EXECUTION_DISABLED",
+                    ].includes(code)
                   ? 503
                   : [
                         "CONFLICT",
@@ -41,9 +45,10 @@ export async function handle(fn: () => Promise<Response>) {
                           "INVALID_INSTRUMENT",
                         ].includes(code)
                       ? 400
-                      : ["PROVIDER_UNAVAILABLE", "PAYMENT_RESULT_UNKNOWN"].includes(
-                            code,
-                          )
+                      : [
+                            "PROVIDER_UNAVAILABLE",
+                            "PAYMENT_RESULT_UNKNOWN",
+                          ].includes(code)
                         ? 503
                         : 500;
     if (status === 500) capture("route_failure");

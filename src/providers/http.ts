@@ -31,6 +31,20 @@ export async function call(
     originalSource: config.source,
     cost: 0,
   };
+  // Global TEST firewall: includes previews, admin probes and report retries.
+  // Return before fetch, retries, analytics or provider_calls insertion.
+  if (!env.MERCADO_PAGO_LIVE_MODE)
+    return {
+      ...base,
+      status: "UNAVAILABLE",
+      errorCode: "PAYMENT_TEST_MODE_BLOCKED",
+    };
+  if (!env.VEHICLE_PROVIDER_EXECUTION_ENABLED)
+    return {
+      ...base,
+      status: "UNAVAILABLE",
+      errorCode: "PROVIDER_EXECUTION_DISABLED",
+    };
   if (!config.key) return base;
   let last = base;
   for (let attempt = 0; attempt < 2; attempt++) {

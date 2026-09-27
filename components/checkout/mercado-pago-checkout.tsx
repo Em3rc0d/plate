@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -26,10 +26,15 @@ type CardForm = {
 };
 
 type MercadoPagoClient = {
-  yape(options: {
-    otp: string;
-    phoneNumber: string;
-  }): { create(): Promise<{ id: string }> };
+  yape(options: { otp: string; phoneNumber: string }): {
+    create(): Promise<{
+      id: string;
+      live_mode?: boolean;
+      site_id?: string;
+      public_key?: string;
+      cardholder?: { name?: string };
+    }>;
+  };
   cardForm(options: Record<string, unknown>): CardForm;
 };
 
@@ -83,6 +88,8 @@ export function MercadoPagoCheckout({
   testMode: boolean;
 }) {
   const router = useRouter();
+  const [paymentLocked, setPaymentLocked] = useState(false);
+  const [tokenDiagnostic, setTokenDiagnostic] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -91,71 +98,85 @@ export function MercadoPagoCheckout({
   const [otp, setOtp] = useState(testMode ? "123456" : "");
   const idempotencyKey = useRef(crypto.randomUUID());
   const cardForm = useRef<CardForm | null>(null);
+  const submitting = useRef(false);
+  const unresolved = useRef(false);
 
-  async function submitInstrument(instrument: {
-    token: string;
-    paymentMethodId: string;
-    installments: number;
-    issuerId?: string;
-  }) {
-    setBusy(true);
-    setError("");
-    setMessage("");
-    try {
-      const response = await fetch(`/api/orders/${orderId}/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          instrument,
-        }),
-      });
-      const data = (await response.json()) as {
-        payment?: {
-          status: PaymentStatus;
-          testMode: boolean;
-          providerStatus: string | null;
+  const submitInstrument = useCallback(
+    async (instrument: {
+      token: string;
+      paymentMethodId: string;
+      installments: number;
+      issuerId?: string;
+    }) => {
+      // A synchronous ref closes the gap before React updates the disabled button.
+      if (unresolved.current) return;
+      unresolved.current = true;
+      setPaymentLocked(true);
+      setBusy(true);
+      setError("");
+      setMessage("");
+      try {
+        const response = await fetch(`/api/orders/${orderId}/payments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idempotencyKey: idempotencyKey.current,
+            instrument,
+          }),
+        });
+        const data = (await response.json()) as {
+          payment?: {
+            status: PaymentStatus;
+            testMode: boolean;
+            providerStatus: string | null;
+          };
+          error?: string;
         };
-        error?: string;
-      };
-      if (!response.ok && response.status !== 202)
-        throw new Error(
-          data.error === "PAYMENT_RESULT_UNKNOWN"
-            ? "El resultado del pago es incierto. No vuelvas a pagar; actualiza esta página para reconciliar el intento."
-            : "No se pudo procesar el pago. Intenta nuevamente en unos minutos.",
-        );
+        if (!response.ok && response.status !== 202)
+          throw new Error(
+            data.error === "PAYMENT_RESULT_UNKNOWN"
+              ? "El resultado del pago es incierto. No vuelvas a pagar; actualiza esta página para reconciliar el intento."
+              : "No se pudo procesar el pago. Intenta nuevamente en unos minutos.",
+          );
 
-      const payment = data.payment;
-      if (!payment) throw new Error("No se recibió el estado del pago.");
+        const payment = data.payment;
+        if (!payment) throw new Error("No se recibió el estado del pago.");
 
-      if (payment.status === "APPROVED") {
+        if (payment.status === "APPROVED") {
+          setMessage(
+            payment.testMode
+              ? "Pago TEST aprobado. No se ejecutó ninguna consulta pagada a Masitaprex."
+              : "Pago aprobado. Estamos generando tu reporte.",
+          );
+          if (!payment.testMode) router.refresh();
+          return;
+        }
+        if (["REJECTED", "CANCELLED"].includes(payment.status)) {
+          unresolved.current = false;
+          setPaymentLocked(false);
+          idempotencyKey.current = crypto.randomUUID();
+          const detail =
+            payment.providerStatus === "bad_request"
+              ? "Mercado Pago rechazó la creación del pago. Puedes volver a intentar sin riesgo de doble cobro."
+              : "Mercado Pago rechazó este intento. Puedes corregir los datos y volver a intentar.";
+          setError(detail);
+          return;
+        }
         setMessage(
-          payment.testMode
-            ? "Pago TEST aprobado. No se ejecutó ninguna consulta pagada a Masitaprex."
-            : "Pago aprobado. Estamos generando tu reporte.",
+          "El pago quedó pendiente de confirmación. No realices un segundo pago; esta página se actualizará.",
         );
-        if (!payment.testMode) router.refresh();
-        return;
+        router.refresh();
+      } catch (e) {
+        setError(
+          (e instanceof Error ? e.message : "No se pudo procesar el pago.") +
+            " No envíes otro pago mientras no se confirme el resultado. Recarga para consultar el intento existente.",
+        );
+      } finally {
+        setBusy(false);
       }
-      if (["REJECTED", "CANCELLED"].includes(payment.status)) {
-        idempotencyKey.current = crypto.randomUUID();
-        const detail =
-          payment.providerStatus === "bad_request"
-            ? "Mercado Pago rechazó la creación del pago. Puedes volver a intentar sin riesgo de doble cobro."
-            : "Mercado Pago rechazó este intento. Puedes corregir los datos y volver a intentar.";
-        setError(detail);
-        return;
-      }
-      setMessage(
-        "El pago quedó pendiente de confirmación. No realices un segundo pago; esta página se actualizará.",
-      );
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo procesar el pago.");
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    [orderId, router],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -202,18 +223,24 @@ export function MercadoPagoCheckout({
             },
             onSubmit: async (event: Event) => {
               event.preventDefault();
+              if (submitting.current || unresolved.current) return;
               if (!localCardForm) return;
               const data = localCardForm.getCardFormData();
               if (!data.token || !data.paymentMethodId) {
                 setError("Completa y verifica los datos de la tarjeta.");
                 return;
               }
-              await submitInstrument({
-                token: data.token,
-                paymentMethodId: data.paymentMethodId,
-                installments: 1,
-                ...(data.issuerId ? { issuerId: String(data.issuerId) } : {}),
-              });
+              submitting.current = true;
+              try {
+                await submitInstrument({
+                  token: data.token,
+                  paymentMethodId: data.paymentMethodId,
+                  installments: 1,
+                  ...(data.issuerId ? { issuerId: String(data.issuerId) } : {}),
+                });
+              } finally {
+                submitting.current = false;
+              }
             },
           },
         };
@@ -228,30 +255,52 @@ export function MercadoPagoCheckout({
       localCardForm?.unmount?.();
       cardForm.current = null;
     };
-  }, [amount, method, publicKey]);
+  }, [amount, method, publicKey, submitInstrument]);
 
   async function submitYape(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current || unresolved.current) return;
     if (!window.MercadoPago) {
       setError("Mercado Pago todavía está cargando.");
       return;
     }
+    submitting.current = true;
     setBusy(true);
     setError("");
     try {
       const mp = new window.MercadoPago(publicKey, { locale: "es-PE" });
       const token = await mp.yape({ phoneNumber: phone, otp }).create();
       if (!token?.id) throw new Error("TOKEN_ERROR");
+      if (testMode) {
+        // Only a whitelist of non-sensitive diagnostics; never log the token or OTP.
+        const sameKey =
+          token.public_key === undefined
+            ? "no informado"
+            : String(token.public_key === publicKey);
+        setTokenDiagnostic(
+          `Token: live_mode=${String(token.live_mode ?? "no informado")}; site=${token.site_id === "MPE" ? "MPE" : "no confirmado"}; Public Key coincide=${sameKey}; marcador Yape=${token.cardholder?.name === "yape" ? "sí" : "no informado"}.`,
+        );
+      }
+      if (
+        (testMode && token.live_mode === true) ||
+        (token.public_key !== undefined && token.public_key !== publicKey) ||
+        (token.site_id !== undefined && token.site_id !== "MPE")
+      ) {
+        throw new Error("TOKEN_ENVIRONMENT_MISMATCH");
+      }
       await submitInstrument({
         token: token.id,
         paymentMethodId: "yape",
         installments: 1,
       });
-    } catch {
+    } catch (e) {
       setError(
-        "No se pudo generar el token de Yape. Revisa el celular y el código OTP.",
+        e instanceof Error && e.message === "TOKEN_ENVIRONMENT_MISMATCH"
+          ? "El token no corresponde al entorno, país o Public Key esperados. No se envió el pago."
+          : "No se pudo generar el token de Yape. Revisa el celular y el código OTP.",
       );
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -261,8 +310,8 @@ export function MercadoPagoCheckout({
       <form onSubmit={submitYape} aria-busy={busy}>
         <h2>Paga S/ {amount.toFixed(2)} con Yape</h2>
         <p className="micro">
-          Mercado Pago procesa el pago. PlacaClara nunca recibe tu OTP como dato
-          persistente.
+          Mercado Pago procesa el pago. El OTP se envía directamente a Mercado
+          Pago; no pasa por el servidor de PlacaClara.
         </p>
         {testMode && (
           <p className="notice">
@@ -292,9 +341,12 @@ export function MercadoPagoCheckout({
             required
           />
         </label>
-        <Button disabled={busy || !ready}>
+        <Button disabled={busy || !ready || paymentLocked}>
           {busy ? "Procesando…" : `Pagar S/ ${amount.toFixed(2)}`}
         </Button>
+        {testMode && tokenDiagnostic && (
+          <p className="micro">{tokenDiagnostic}</p>
+        )}
         {message && <p className="notice">{message}</p>}
         {error && (
           <p role="alert" className="error">
@@ -353,7 +405,7 @@ export function MercadoPagoCheckout({
           Emisor
           <select id="mp-issuer" required />
         </label>
-        <Button disabled={busy || !ready}>
+        <Button disabled={busy || !ready || paymentLocked}>
           {busy ? "Procesando…" : `Pagar S/ ${amount.toFixed(2)}`}
         </Button>
       </form>

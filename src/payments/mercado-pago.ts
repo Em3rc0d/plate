@@ -45,6 +45,7 @@ type ProviderPayment = {
   live_mode?: boolean;
   status?: string;
   status_detail?: string;
+  payment_method_id?: string;
   date_last_updated?: string;
   transaction_amount_refunded?: number | string;
 };
@@ -67,12 +68,14 @@ function assertConfigured() {
   if (!mercadoPagoConfigured) throw new Error("PAYMENT_NOT_CONFIGURED");
   if (
     !env.MERCADO_PAGO_LIVE_MODE &&
-    !env.MERCADO_PAGO_ACCESS_TOKEN.startsWith("TEST-")
+    (!env.MERCADO_PAGO_ACCESS_TOKEN.startsWith("TEST-") ||
+      !env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY.startsWith("TEST-"))
   )
     throw new Error("MERCADO_PAGO_TEST_CREDENTIAL_REQUIRED");
   if (
     env.MERCADO_PAGO_LIVE_MODE &&
-    env.MERCADO_PAGO_ACCESS_TOKEN.startsWith("TEST-")
+    (env.MERCADO_PAGO_ACCESS_TOKEN.startsWith("TEST-") ||
+      env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY.startsWith("TEST-"))
   )
     throw new Error("MERCADO_PAGO_LIVE_CREDENTIAL_REQUIRED");
 }
@@ -89,7 +92,11 @@ class MercadoPagoHttpError extends Error {
 
 async function providerRequest(
   path: string,
-  init: { method?: "GET" | "POST"; body?: unknown; idempotencyKey?: string } = {},
+  init: {
+    method?: "GET" | "POST";
+    body?: unknown;
+    idempotencyKey?: string;
+  } = {},
 ) {
   assertConfigured();
   try {
@@ -107,15 +114,25 @@ async function providerRequest(
       },
       ...(init.body ? { body: JSON.stringify(init.body) } : {}),
     });
-    const payload = (await response.json().catch(() => null)) as
-      | { message?: string; error?: string; status?: number; cause?: unknown }
-      | null;
+    const payload = (await response.json().catch(() => null)) as {
+      message?: string;
+      error?: string;
+      status?: number;
+      cause?: { code?: string | number }[];
+    } | null;
     if (!response.ok) {
       console.error("mercadopago_provider_error", {
         path,
         status: response.status,
         error: payload?.error ?? null,
         message: payload?.message ?? null,
+        requestId: response.headers.get("x-request-id"),
+        causeCodes: Array.isArray(payload?.cause)
+          ? payload.cause
+              .map((c) => String(c?.code ?? ""))
+              .filter((c) => /^[A-Za-z0-9_-]{1,80}$/.test(c))
+              .slice(0, 8)
+          : [],
       });
       throw new MercadoPagoHttpError(
         response.status,
@@ -162,7 +179,10 @@ async function attachProviderId(attemptId: string, providerId: string) {
   const rows = required(
     await db()
       .from("payment_attempts")
-      .update({ provider_payment_id: providerId, updated_at: new Date().toISOString() })
+      .update({
+        provider_payment_id: providerId,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", attemptId)
       .is("provider_payment_id", null)
       .select("id"),
@@ -177,6 +197,8 @@ async function attachProviderId(attemptId: string, providerId: string) {
 function verifyProviderPayment(attempt: AttemptRow, raw: ProviderPayment) {
   const id = String(raw.id ?? "");
   if (!/^\d+$/.test(id)) throw new Error("INVALID_PROVIDER_ID");
+  if (raw.payment_method_id !== attempt.payment_method_id)
+    throw new Error("PROVIDER_METHOD_MISMATCH");
   if (raw.external_reference !== attempt.id)
     throw new Error("PROVIDER_REFERENCE_MISMATCH");
   if (amountMinor(raw.transaction_amount) !== Number(attempt.amount_minor))
@@ -187,7 +209,10 @@ function verifyProviderPayment(attempt: AttemptRow, raw: ProviderPayment) {
     throw new Error("PROVIDER_ACCOUNT_MISMATCH");
   if (raw.live_mode !== env.MERCADO_PAGO_LIVE_MODE)
     throw new Error("PROVIDER_MODE_MISMATCH");
-  if (typeof raw.status !== "string" || typeof raw.date_last_updated !== "string")
+  if (
+    typeof raw.status !== "string" ||
+    typeof raw.date_last_updated !== "string"
+  )
     throw new Error("INVALID_PROVIDER_SNAPSHOT");
   const updated = new Date(raw.date_last_updated);
   if (!Number.isFinite(updated.getTime()))
@@ -215,7 +240,9 @@ async function applySnapshot(attempt: AttemptRow, raw: ProviderPayment) {
         p_updated_at: snapshot.updatedAt,
         p_mark_paid: env.MERCADO_PAGO_LIVE_MODE,
       }),
-    ) === true;
+    ) === true &&
+    env.MERCADO_PAGO_LIVE_MODE &&
+    snapshot.liveMode;
   return {
     attemptId: attempt.id,
     providerPaymentId: snapshot.providerId,
@@ -274,7 +301,10 @@ async function syncProviderPayment(raw: ProviderPayment) {
         .eq("id", reference)
         .maybeSingle(),
     ) as AttemptRow | null;
-    if (attempt) await attachProviderId(attempt.id, providerId);
+    if (attempt) {
+      verifyProviderPayment(attempt, raw);
+      await attachProviderId(attempt.id, providerId);
+    }
   }
   if (!attempt) return null;
   return applySnapshot(attempt, raw);
@@ -293,8 +323,8 @@ export async function createMercadoPagoPayment(
   if (
     !/^[a-z0-9_-]{2,80}$/i.test(instrument.paymentMethodId) ||
     !Number.isInteger(instrument.installments) ||
-    instrument.installments < 1 ||
-    instrument.installments > 48
+    instrument.installments !== 1 ||
+    (instrument.paymentMethodId === "yape" && !!instrument.issuerId)
   )
     throw new Error("INVALID_INSTRUMENT");
 
@@ -321,6 +351,20 @@ export async function createMercadoPagoPayment(
   let attempt = await attemptById(claim.attempt_id);
 
   if (!claim.created) {
+    if (
+      !attempt.provider_payment_id &&
+      ["REJECTED", "CANCELLED"].includes(attempt.status)
+    ) {
+      return {
+        attemptId: attempt.id,
+        providerPaymentId: null,
+        status: attempt.status,
+        providerStatus: attempt.provider_status,
+        liveMode: attempt.live_mode,
+        shouldFulfill: false,
+        testMode: !env.MERCADO_PAGO_LIVE_MODE,
+      };
+    }
     if (attempt.provider_payment_id)
       return applySnapshot(
         attempt,
@@ -328,6 +372,7 @@ export async function createMercadoPagoPayment(
       );
     const recovered = await findByExternalReference(attempt.id);
     if (recovered) {
+      verifyProviderPayment(attempt, recovered);
       await attachProviderId(attempt.id, String(recovered.id));
       attempt = await attemptById(attempt.id);
       return applySnapshot(attempt, recovered);
@@ -364,16 +409,21 @@ export async function createMercadoPagoPayment(
       },
     })) as { id?: string | number };
   } catch (error) {
-    if (error instanceof MercadoPagoHttpError && error.status >= 400 && error.status < 500) {
-      await db()
-        .from("payment_attempts")
-        .update({
-          status: "REJECTED",
-          provider_status: error.providerError ?? "rejected",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", attempt.id)
-        .eq("status", "CREATING");
+    if (
+      error instanceof MercadoPagoHttpError &&
+      [400, 401, 403, 404, 422].includes(error.status)
+    ) {
+      checked(
+        await db()
+          .from("payment_attempts")
+          .update({
+            status: "REJECTED",
+            provider_status: error.providerError ?? "rejected",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", attempt.id)
+          .eq("status", "CREATING"),
+      );
       return {
         attemptId: attempt.id,
         providerPaymentId: null,
@@ -427,9 +477,7 @@ export function verifyMercadoPagoWebhook(request: Request) {
   )
     throw new Error("INVALID_SIGNATURE");
 
-  const entries = signature
-    .split(",")
-    .map((part) => part.trim().split("="));
+  const entries = signature.split(",").map((part) => part.trim().split("="));
   if (entries.length !== 2 || entries.some((entry) => entry.length !== 2))
     throw new Error("INVALID_SIGNATURE");
   const parts = Object.fromEntries(entries);
@@ -439,8 +487,7 @@ export function verifyMercadoPagoWebhook(request: Request) {
   )
     throw new Error("INVALID_SIGNATURE");
 
-  const timestamp =
-    Number(parts.ts) * (parts.ts.length === 10 ? 1000 : 1);
+  const timestamp = Number(parts.ts) * (parts.ts.length === 10 ? 1000 : 1);
   if (Math.abs(Date.now() - timestamp) > 300_000)
     throw new Error("INVALID_SIGNATURE");
 
@@ -453,4 +500,47 @@ export function verifyMercadoPagoWebhook(request: Request) {
   if (actual.length !== expected.length || !timingSafeEqual(expected, actual))
     throw new Error("INVALID_SIGNATURE");
   return dataId;
+}
+
+export async function diagnoseMercadoPagoTestCredentials() {
+  assertConfigured();
+  if (env.MERCADO_PAGO_LIVE_MODE) throw new Error("FORBIDDEN");
+  const [account, methods] = await Promise.allSettled([
+    providerRequest("/users/me"),
+    providerRequest("/v1/payment_methods"),
+  ]);
+  const user =
+    account.status === "fulfilled"
+      ? (account.value as { id?: number; site_id?: string })
+      : null;
+  const list =
+    methods.status === "fulfilled" && Array.isArray(methods.value)
+      ? (methods.value as {
+          id?: string;
+          status?: string;
+          payment_type_id?: string;
+        }[])
+      : null;
+  const yape = list?.find((item) => item.id === "yape");
+  return {
+    testMode: true,
+    publicKeyIsTest:
+      env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY.startsWith("TEST-"),
+    accessTokenIsTest: env.MERCADO_PAGO_ACCESS_TOKEN.startsWith("TEST-"),
+    publicKeyFingerprint: digest(env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY).slice(
+      0,
+      12,
+    ),
+    accountLookupSucceeded: user !== null,
+    collectorMatches: user
+      ? String(user.id) === env.MERCADO_PAGO_COLLECTOR_ID
+      : null,
+    siteIsPeru: user ? user.site_id === "MPE" : null,
+    paymentMethodsLookupSucceeded: list !== null,
+    yapeListed: list ? !!yape : null,
+    yapeActive: yape ? yape.status === "active" : null,
+    // Prefixes and collector checks do NOT prove these keys belong to one app.
+    sameApplicationVerified: false,
+    vehicleProvidersBlocked: true,
+  };
 }

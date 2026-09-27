@@ -27,6 +27,9 @@ export async function generateVehicleReport({
   recovery?: boolean;
   requestId?: string;
 }): Promise<{ status: string; reportId?: string }> {
+  if (!env.MERCADO_PAGO_LIVE_MODE) throw new Error("PAYMENT_TEST_MODE_BLOCKED");
+  if (!env.VEHICLE_PROVIDER_EXECUTION_ENABLED)
+    throw new Error("PROVIDER_EXECUTION_DISABLED");
   plate = normalizePlate(plate);
   const database = db();
   const order = required(

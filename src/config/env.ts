@@ -67,6 +67,10 @@ export const env = z
       (v) => (v === "true" || v === true ? true : false),
       z.boolean().default(false),
     ),
+    VEHICLE_PROVIDER_EXECUTION_ENABLED: z.preprocess(
+      (v) => v === "true" || v === true,
+      z.boolean().default(false),
+    ),
     YAPE_DISPLAY_NAME: optional,
     YAPE_PHONE: optional,
     NEXT_PUBLIC_YAPE_QR_URL: optional,

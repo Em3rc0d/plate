@@ -30,7 +30,7 @@ export async function POST(
           .object({
             token: z.string().min(1).max(4096),
             paymentMethodId: z.string().min(2).max(80),
-            installments: z.number().int().min(1).max(48).default(1),
+            installments: z.literal(1).default(1),
             issuerId: z.string().min(1).max(80).optional(),
           })
           .strict(),
