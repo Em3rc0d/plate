@@ -71,12 +71,16 @@ begin
     return;
   end if;
 
-  if exists(
-    select 1 from public.payment_attempts
-    where order_id=p_order
-      and status in ('CREATING','PENDING','APPROVED','UNKNOWN')
-  ) then
-    raise exception 'PAYMENT_ALREADY_ACTIVE';
+  select * into a
+  from public.payment_attempts
+  where order_id=p_order
+    and status in ('CREATING','PENDING','APPROVED','UNKNOWN')
+  order by created_at desc
+  limit 1;
+
+  if found then
+    return query select a.id, false;
+    return;
   end if;
 
   insert into public.payment_attempts(
@@ -140,7 +144,7 @@ begin
         paid_at=coalesce(paid_at,now()),
         payment_reference=p_provider_id
     where id=a.order_id
-      and status in ('PAYMENT_PENDING','REJECTED');
+      and status in ('PAYMENT_PENDING','PAYMENT_REVIEW','REJECTED');
     get diagnostics n=row_count;
   end if;
 
