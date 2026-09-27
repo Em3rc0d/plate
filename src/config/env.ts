@@ -1,6 +1,24 @@
 import "server-only";
 import { z } from "zod";
 const optional = z.string().default("");
+const defaultSiteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
+const siteUrl = z.preprocess(
+  (v) => (typeof v === "string" && v.trim() ? v.trim() : defaultSiteUrl),
+  z
+    .string()
+    .url()
+    .refine((v) => {
+      const u = new URL(v);
+      return (
+        ["http:", "https:"].includes(u.protocol) &&
+        u.pathname === "/" &&
+        !u.search &&
+        !u.hash
+      );
+    }, "Site URL must be an origin"),
+);
 const amount = (fallback: number) =>
   z.preprocess(
     (v) => (v === "" || v === undefined ? fallback : v),
@@ -9,19 +27,7 @@ const amount = (fallback: number) =>
 export const env = z
   .object({
     NEXT_PUBLIC_PRODUCT_NAME: z.string().default("Vehicle Intelligence PE"),
-    NEXT_PUBLIC_SITE_URL: z
-      .string()
-      .url()
-      .refine((v) => {
-        const u = new URL(v);
-        return (
-          ["http:", "https:"].includes(u.protocol) &&
-          u.pathname === "/" &&
-          !u.search &&
-          !u.hash
-        );
-      }, "Site URL must be an origin")
-      .default("http://localhost:3000"),
+    NEXT_PUBLIC_SITE_URL: siteUrl,
     REPORT_PRICE_PEN: amount(15.9),
     LAUNCH_PROFILE: z.enum(["REGISTRY_LEAN", "FULL"]).default("REGISTRY_LEAN"),
     NEXT_PUBLIC_SUPABASE_URL: optional,
