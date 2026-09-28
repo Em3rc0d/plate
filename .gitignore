@@ -1,6 +1,22 @@
+# Dependencies
 node_modules
+
+# Next.js / build
 .next
+out
+*.tsbuildinfo
+
+# Local Vercel metadata
+.vercel
+
+# Environment files
 .env*
 !.env.example
 !.env.production.template
-*.tsbuildinfo
+
+# Test / coverage output
+coverage
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
