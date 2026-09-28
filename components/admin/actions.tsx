@@ -29,7 +29,7 @@ export function OrderActions({
     if (
       forceRefresh &&
       !confirm(
-        "Esto vuelve a consultar proveedores y puede consumir saldo. ¿Continuar?",
+        "Esto actualiza SOAT, CITV y papeletas y puede consumir 3 créditos de PlacApi. La evidencia registral guardada se reutiliza y Masitaprex no se consulta de nuevo. ¿Continuar?",
       )
     )
       return;
@@ -130,7 +130,7 @@ export function OrderActions({
             variant="outline"
             onClick={() => action("reprocess", true)}
           >
-            Actualizar fuentes
+            Actualizar SOAT / CITV / papeletas
           </Button>
         </>
       )}
