@@ -33,8 +33,10 @@ export default function Page() {
             Utilizamos servicios de alojamiento, base de datos, correo y
             consulta vehicular. La explicación opcional con IA recibe
             información documental sin identidades de propietarios. La
-            analítica, si se habilita, recibe eventos sin comprobantes ni
-            documentos personales.
+            analítica operativa registra eventos pseudónimos del recorrido de
+            compra sin placa, correo, teléfono, comprobantes ni documentos
+            personales. Si se habilita una plataforma externa de analítica,
+            recibe únicamente esos eventos limitados.
           </p>
           <h2>Conservación</h2>
           <p>
