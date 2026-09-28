@@ -1,12 +1,24 @@
-import { documentarySummary } from "@/src/reports/summary";
 import { summarySchema } from "@/src/findings/ai-summary";
 import { PageEvent } from "@/components/marketing/page-event";
-import { labels, legalNotice, productName } from "@/src/config/product";
-import type { ReportRow } from "@/src/vehicle/canonical";
-import { lines, reportSections, fieldLabels } from "@/src/reports/sections";
+import { legalNotice, productName } from "@/src/config/product";
+import type {
+  EvidenceRecord,
+  EvidenceStatus,
+  ReportRow,
+} from "@/src/vehicle/canonical";
+import { lines, reportSections } from "@/src/reports/sections";
 import Link from "next/link";
 import { ShareButton } from "./share-button";
 import styles from "./report-view.module.css";
+
+const customerStates: Record<EvidenceStatus, string> = {
+  VERIFIED: "Información disponible",
+  NOT_FOUND: "Sin registros devueltos",
+  UNAVAILABLE: "No disponible en esta consulta",
+  NOT_CONFIGURED: "Fuente no integrada",
+  STALE: "Información desactualizada",
+  CONFLICT: "Datos en conflicto",
+};
 
 function limaDate(value: string) {
   return new Date(value).toLocaleString("es-PE", {
@@ -16,9 +28,45 @@ function limaDate(value: string) {
   });
 }
 
+function shortDate(value?: string) {
+  if (!value) return "No informado";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return value;
+  return date.toLocaleDateString("es-PE", {
+    timeZone: "UTC",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function sectionState(traces: EvidenceRecord[]): EvidenceStatus {
+  for (const status of [
+    "CONFLICT",
+    "STALE",
+    "UNAVAILABLE",
+    "NOT_CONFIGURED",
+    "VERIFIED",
+    "NOT_FOUND",
+  ] as const) {
+    if (traces.some((trace) => trace.status === status)) return status;
+  }
+  return "UNAVAILABLE";
+}
+
+function dedupeTraces(traces: EvidenceRecord[]) {
+  return [
+    ...new Map(
+      traces.map((trace) => [
+        `${trace.originalSource}|${trace.provider}|${trace.checkedAt}|${trace.status}`,
+        trace,
+      ]),
+    ).values(),
+  ];
+}
+
 export function ReportView({ row }: { row: ReportRow }) {
   const r = row.report_json;
-  const stats = documentarySummary(r);
   const summary = summarySchema.safeParse(row.summary_json);
   const sections = reportSections(r).map((section) => {
     const evidence = r.evidence.filter(
@@ -41,11 +89,74 @@ export function ReportView({ row }: { row: ReportRow }) {
       traces.length > 0 &&
       !unsupported &&
       traces.some((e) => e.status !== "NOT_CONFIGURED");
-    return { ...section, traces, available, configured, unsupported };
+    return {
+      ...section,
+      traces,
+      compactTraces: dedupeTraces(traces),
+      state: sectionState(traces),
+      available,
+      configured,
+      unsupported,
+    };
   });
 
   const dataSections = sections.filter((s) => s.configured || s.available);
   const pendingSections = sections.filter((s) => !s.configured && !s.available);
+  const byKey = (key: string) => sections.find((section) => section.key === key);
+  const identity = byKey("identity");
+  const registry = byKey("registry");
+  const insurance = byKey("insurance");
+  const inspection = byKey("inspection");
+  const fines = byKey("fines");
+
+  const overview = [
+    {
+      label: "Vehículo",
+      status: identity ? customerStates[identity.state] : "Información disponible",
+      detail: [
+        r.identity.brand,
+        r.identity.model,
+        r.identity.modelYear || r.identity.manufactureYear,
+        r.identity.color,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    },
+    {
+      label: "SOAT",
+      status:
+        insurance?.state === "VERIFIED" && r.insurance.current
+          ? r.insurance.current.status === "ACTIVE"
+            ? "Vigente"
+            : "Información disponible"
+          : customerStates[insurance?.state || "UNAVAILABLE"],
+      detail: r.insurance.current
+        ? [
+            r.insurance.current.issuer,
+            r.insurance.current.validUntil
+              ? `hasta ${shortDate(r.insurance.current.validUntil)}`
+              : undefined,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : "Consulta incluida en el expediente",
+    },
+    {
+      label: "Situación registral",
+      status: customerStates[registry?.state || "UNAVAILABLE"],
+      detail: r.registry.registryNumber
+        ? `Partida ${r.registry.registryNumber}`
+        : "Datos registrales de la consulta",
+    },
+    {
+      label: "Cobertura pendiente",
+      status:
+        inspection?.state === "VERIFIED" && fines?.state === "VERIFIED"
+          ? "Información disponible"
+          : "Revisar cobertura",
+      detail: `CITV: ${customerStates[inspection?.state || "UNAVAILABLE"]} · Papeletas: ${customerStates[fines?.state || "UNAVAILABLE"]}`,
+    },
+  ];
 
   return (
     <main id="main" className="report report-v2">
@@ -56,16 +167,25 @@ export function ReportView({ row }: { row: ReportRow }) {
             <Link className={styles.brand} href="/">
               {productName}
             </Link>
-            <span className={`status ${styles.state}`}>{labels[row.status]}</span>
+            <span className={`status ${styles.state}`}>
+              {row.status === "REPORT_PARTIAL"
+                ? "Reporte parcial"
+                : "Reporte disponible"}
+            </span>
           </div>
 
           <div className={styles.identity}>
             <div className="plate">{r.identity.plate}</div>
             <div>
-              <p className={styles.kicker}>Reporte vehicular</p>
+              <p className={styles.kicker}>Reporte vehicular · Perú</p>
               <h1>
                 {r.identity.brand || "Vehículo"} {r.identity.model}
               </h1>
+              <p className="muted">
+                {[r.identity.modelYear || r.identity.manufactureYear, r.identity.color]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
               <p className="muted">
                 Emitido {limaDate(row.created_at)} · hora de Lima
               </p>
@@ -92,51 +212,34 @@ export function ReportView({ row }: { row: ReportRow }) {
         <section className={`card ${styles.summaryCard}`}>
           <div className={styles.sectionHeading}>
             <div>
-              <p className={styles.kicker}>Resumen ejecutivo</p>
-              <h2>{stats.label}</h2>
+              <p className={styles.kicker}>Resumen del reporte</p>
+              <h2>Lo principal de esta consulta</h2>
             </div>
-            <span className="status report-state">{labels[row.status]}</span>
           </div>
 
-          <div className={styles.metrics}>
-            <div>
-              <strong>{stats.completed}</strong>
-              <span>secciones verificadas</span>
-            </div>
-            <div>
-              <strong>{stats.review}</strong>
-              <span>hallazgos para revisar</span>
-            </div>
-            <div>
-              <strong>{stats.unavailable}</strong>
-              <span>secciones parciales o no disponibles</span>
-            </div>
+          <div className={styles.overviewGrid}>
+            {overview.map((item) => (
+              <div className={styles.overviewCard} key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.status}</strong>
+                <p>{item.detail}</p>
+              </div>
+            ))}
           </div>
 
           <p className={styles.summaryNote}>
-            Este documento resume evidencia devuelta por las fuentes consultadas.
-            No constituye una recomendación de compra.
+            La información mostrada corresponde a las fuentes consultadas. No
+            constituye una certificación jurídica ni una recomendación de compra.
           </p>
 
-          {r.registry.ownerIdentityAmbiguous ? (
+          {r.registry.ownerIdentityAmbiguous && (
             <div className={styles.callout}>
-              <strong>Revisión registral recomendada</strong>
+              <strong>Historial registral para revisar</strong>
               <p>
-                Se detectaron registros históricos cuya identidad documental no
-                permite afirmar un número exacto de propietarios.
+                Los registros históricos devueltos no permiten afirmar por sí
+                solos un número exacto de propietarios o transferencias.
               </p>
             </div>
-          ) : (
-            r.registry.distinctOwnerCount !== undefined && (
-              <div className={styles.callout}>
-                <strong>Historial registral</strong>
-                <p>
-                  {r.registry.distinctOwnerCount} identidades distintas aparecen
-                  en los registros devueltos. Esto no implica que sea el historial
-                  completo de transferencias.
-                </p>
-              </div>
-            )
           )}
         </section>
 
@@ -146,8 +249,8 @@ export function ReportView({ row }: { row: ReportRow }) {
             <h2>Datos del vehículo y situación registral</h2>
           </div>
           <p>
-            La información visible proviene directamente de la evidencia
-            almacenada para esta consulta.
+            Se conservan todos los datos útiles devueltos por las fuentes; la
+            metadata técnica repetitiva se agrupa por sección.
           </p>
         </div>
 
@@ -155,15 +258,11 @@ export function ReportView({ row }: { row: ReportRow }) {
           <section className={`card ${styles.dataCard}`} key={section.key}>
             <div className={styles.sectionHeading}>
               <h2>{section.title}</h2>
-              <div className="section-statuses" aria-label="Estados de la evidencia">
-                {[...new Set(section.traces.map((e) => e.status))].map(
-                  (status) => (
-                    <span key={status} className={`status ${status}`}>
-                      {labels[status]}
-                    </span>
-                  ),
-                )}
-              </div>
+              {section.state !== "VERIFIED" && (
+                <span className={`status ${section.state}`}>
+                  {customerStates[section.state]}
+                </span>
+              )}
             </div>
 
             {section.available ? (
@@ -176,12 +275,12 @@ export function ReportView({ row }: { row: ReportRow }) {
               </div>
             ) : (
               <p className={styles.empty}>
-                No hay información disponible para esta sección. Esto no
-                acredita ausencia de registros.
+                {customerStates[section.state]}. Esto no acredita ausencia de
+                registros.
               </p>
             )}
 
-            {section.traces.some((e) => e.status === "NOT_FOUND") && (
+            {section.state === "NOT_FOUND" && (
               <p className={styles.inlineNote}>
                 La fuente respondió correctamente y no devolvió registros para
                 esta sección.
@@ -196,34 +295,25 @@ export function ReportView({ row }: { row: ReportRow }) {
               </p>
             )}
 
-            {section.traces.some((e) => e.status === "CONFLICT") && (
+            {section.state === "CONFLICT" && (
               <p className={`${styles.inlineNote} ${styles.warning}`}>
                 Existen datos incompatibles entre fuentes. El reporte conserva
                 la discrepancia para revisión.
               </p>
             )}
 
-            {!!section.traces.length && (
+            {!!section.compactTraces.length && (
               <details className={styles.trace}>
-                <summary>
-                  Ver trazabilidad y fuentes ({section.traces.length})
-                </summary>
+                <summary>Fuente y fecha de consulta</summary>
                 <div className="evidence">
-                  {section.traces.map((e, i) => (
+                  {section.compactTraces.map((trace, i) => (
                     <div className={styles.traceRow} key={i}>
-                      <div>
-                        <span className={`status ${e.status}`}>
-                          {labels[e.status]}
-                        </span>{" "}
-                        <strong>
-                          {fieldLabels[e.fieldPath.split(".").at(-1) || ""] ||
-                            section.title}
-                        </strong>
-                      </div>
+                      <strong>{trace.originalSource}</strong>
                       <p>
-                        {e.originalSource}
-                        <br />
-                        Consultado {limaDate(e.checkedAt)} · hora de Lima
+                        {trace.status !== "VERIFIED"
+                          ? `${customerStates[trace.status]} · `
+                          : ""}
+                        Consultado {limaDate(trace.checkedAt)} · hora de Lima
                       </p>
                     </div>
                   ))}
@@ -238,40 +328,29 @@ export function ReportView({ row }: { row: ReportRow }) {
             <div className={styles.sectionTitle}>
               <div>
                 <p className={styles.kicker}>02 · Cobertura pendiente</p>
-                <h2>Fuentes aún no integradas o no configuradas</h2>
+                <h2>Fuentes aún no integradas</h2>
               </div>
               <p>
-                Estas secciones no se interpretan como “sin antecedentes”. Se
-                muestran separadas para no mezclarlas con datos efectivamente
-                consultados.
+                Estas secciones no se presentan como “sin antecedentes” porque
+                no fueron consultadas con una fuente activa.
               </p>
             </div>
 
             <div className={styles.coverageGrid}>
-              {pendingSections.map((section) => {
-                const sources = [
-                  ...new Set(section.traces.map((e) => e.originalSource)),
-                ];
-                return (
-                  <section className={styles.coverageCard} key={section.key}>
-                    <div className={styles.sectionHeading}>
-                      <h3>{section.title}</h3>
-                      <span className="status NOT_CONFIGURED">
-                        Fuente no configurada
-                      </span>
-                    </div>
-                    <p>
-                      No hay información disponible para esta sección en esta
-                      consulta.
-                    </p>
-                    {!!sources.length && (
-                      <p className="micro">
-                        Fuente prevista: {sources.join(" · ")}
-                      </p>
-                    )}
-                  </section>
-                );
-              })}
+              {pendingSections.map((section) => (
+                <section className={styles.coverageCard} key={section.key}>
+                  <div className={styles.sectionHeading}>
+                    <h3>{section.title}</h3>
+                    <span className="status NOT_CONFIGURED">
+                      Fuente no integrada
+                    </span>
+                  </div>
+                  <p>
+                    No hay información disponible para esta sección en esta
+                    consulta. Esto no acredita ausencia de antecedentes.
+                  </p>
+                </section>
+              ))}
             </div>
           </>
         )}
@@ -279,14 +358,17 @@ export function ReportView({ row }: { row: ReportRow }) {
         <div className={styles.sectionTitle}>
           <div>
             <p className={styles.kicker}>03 · Revisión</p>
-            <h2>Hallazgos y próximos puntos de control</h2>
+            <h2>Hallazgos para revisar</h2>
           </div>
         </div>
 
         <section className={`card ${styles.findings}`}>
           {r.findings.length ? (
             r.findings.map((f, i) => (
-              <article className={`${styles.finding} ${f.severity === "REVIEW" ? styles.review : ""}`} key={i}>
+              <article
+                className={`${styles.finding} ${f.severity === "REVIEW" ? styles.review : ""}`}
+                key={i}
+              >
                 <span>{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <strong>{f.title}</strong>
@@ -346,12 +428,14 @@ export function ReportView({ row }: { row: ReportRow }) {
           <div>
             <h3>Cómo leer los estados</h3>
             <p>
-              <strong>Verificado:</strong> la fuente devolvió el dato.{" "}
-              <strong>Sin registros:</strong> la fuente respondió con cero
-              resultados. <strong>No disponible:</strong> la consulta o el campo
-              no se pudo obtener. <strong>Desactualizado:</strong> supera el
-              plazo de frescura configurado. <strong>Conflicto:</strong> existen
-              datos incompatibles.
+              <strong>Información disponible:</strong> la fuente devolvió datos.{" "}
+              <strong>Sin registros devueltos:</strong> la fuente respondió sin
+              coincidencias dentro de su cobertura.{" "}
+              <strong>No disponible:</strong> el dato no pudo obtenerse en esta
+              consulta. <strong>Fuente no integrada:</strong> PlacaClara no tiene
+              una fuente activa para esa sección.{" "}
+              <strong>Datos en conflicto:</strong> existen discrepancias que deben
+              contrastarse con los documentos de origen.
             </p>
           </div>
           <div className={styles.limitations}>
