@@ -22,6 +22,11 @@ export async function createOrder(input: {
 }) {
   if (!commercialReadiness().ready)
     throw new Error("SERVICE_NOT_CONFIGURED");
+  if (
+    !env.YAPE_CHECKOUT_ENABLED &&
+    (input.method === "MP_YAPE" || input.method === "YAPE")
+  )
+    throw new Error("PAYMENT_METHOD_DISABLED");
   if (input.method.startsWith("MP_")) {
     if (!mercadoPagoConfigured) throw new Error("PAYMENT_NOT_CONFIGURED");
   } else {
