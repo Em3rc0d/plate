@@ -7,11 +7,13 @@ export function OrderActions({
   status,
   stale = false,
   reportId,
+  providerExecutionEnabled = false,
 }: {
   id: string;
   status: string;
   stale?: boolean;
   reportId?: string;
+  providerExecutionEnabled?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -49,6 +51,13 @@ export function OrderActions({
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data?.error === "PROVIDER_EXECUTION_DISABLED") {
+          setMessage(
+            "Proveedores bloqueados por seguridad. El pago sigue aprobado; no se hará otro cobro.",
+          );
+          requestKey.current = null;
+          return;
+        }
         if (res.status === 409) {
           setMessage(
             "El estado cambió o existe un proceso activo. Revisa el pedido.",
@@ -93,8 +102,15 @@ export function OrderActions({
       {((!reportId && ["FAILED", "PAID"].includes(status)) ||
         stale ||
         (!!reportId && status === "FAILED")) && (
-        <Button disabled={busy} onClick={() => action("reprocess")}>
-          {stale ? "Recuperar / reprocesar" : "Reprocesar"}
+        <Button
+          disabled={busy || !providerExecutionEnabled}
+          onClick={() => action("reprocess")}
+        >
+          {providerExecutionEnabled
+            ? stale
+              ? "Recuperar / reprocesar"
+              : "Reprocesar"
+            : "Reprocesar (proveedor bloqueado)"}
         </Button>
       )}
       {reportId && (
@@ -136,5 +152,44 @@ export function Logout() {
     >
       Cerrar sesión
     </Button>
+  );
+}
+
+
+export function PdfRuntimeCheck() {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function run() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/reports/pdf-runtime-check", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error();
+      setMessage(
+        `PDF runtime OK · ${Number(data.bytes || 0).toLocaleString("es-PE")} bytes · Masitaprex no ejecutado.`,
+      );
+    } catch {
+      setMessage(
+        "PDF runtime falló. No se ejecutó Masitaprex; revisa logs antes de habilitar proveedores.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex">
+      <Button disabled={busy} variant="outline" onClick={run}>
+        {busy ? "Probando PDF…" : "Probar runtime PDF"}
+      </Button>
+      <span className="micro" role="status">
+        {message}
+      </span>
+    </div>
   );
 }
