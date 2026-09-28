@@ -63,7 +63,7 @@ export function commercialReadiness(): CommercialReadiness {
 
 export function offeringName() {
   return env.LAUNCH_PROFILE === "REGISTRY_LEAN"
-    ? "Reporte Registral Vehicular"
+    ? "Reporte Documental Vehicular"
     : "Reporte Vehicular Completo";
 }
 

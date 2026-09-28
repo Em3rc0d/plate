@@ -16,7 +16,7 @@ import { ReportPreview } from "@/components/marketing/report-preview";
 import { PageEvent } from "@/components/marketing/page-event";
 import { PlateForm } from "@/components/marketing/plate-form";
 import { Button } from "@/components/ui/button";
-import { env } from "@/src/config/env";
+import { env, mercadoPagoConfigured } from "@/src/config/env";
 import { offeringName } from "@/src/config/commercial";
 import {
   capabilityLabels,
@@ -25,7 +25,7 @@ import {
 } from "@/src/config/providers";
 
 const states = [
-  ["VERIFIED", "Información verificada", "La fuente devolvió información."],
+  ["VERIFIED", "Información disponible", "La fuente devolvió datos para esta sección."],
   [
     "NOT_FOUND",
     "Sin registros devueltos",
@@ -75,8 +75,8 @@ export default function Home() {
               Antes de comprar un usado, revisa sus registros.
             </h1>
             <p className="master-lead">
-              Consulta la información registral disponible del vehículo, con
-              fuente, fecha y límites claros antes de tomar una decisión.
+              Consulta la información vehicular disponible, con fuente, fecha
+              y límites claros antes de tomar una decisión.
             </p>
 
             <PlateForm />
@@ -94,7 +94,9 @@ export default function Home() {
               </span>
               <span>
                 <ShieldCheck size={18} aria-hidden="true" />
-                Pago con validación manual
+                {mercadoPagoConfigured
+                  ? "Pago seguro con Mercado Pago"
+                  : "Pago según disponibilidad"}
               </span>
               <span>
                 <LockKeyhole size={18} aria-hidden="true" />
@@ -225,11 +227,13 @@ export default function Home() {
               ],
               [
                 "Revisa cobertura y paga",
-                "Confirma precio y cobertura antes de adjuntar tu comprobante.",
+                mercadoPagoConfigured
+                  ? "Confirma precio y cobertura y paga de forma segura con Mercado Pago."
+                  : "Confirma precio y cobertura antes de continuar con el pago.",
               ],
               [
                 "Recibe tu reporte",
-                "Tras validar el pago, generamos el reporte con las fuentes habilitadas.",
+                "Tras confirmar el pago, generamos el reporte con las fuentes habilitadas.",
               ],
             ].map(([title, text], i) => (
               <li key={title}>
@@ -283,7 +287,11 @@ export default function Home() {
               <div className="price">
                 <small>S/</small> {env.REPORT_PRICE_PEN.toFixed(2)}
               </div>
-              <p>Pago único · Yape / Plin según disponibilidad</p>
+              <p>
+                {mercadoPagoConfigured
+                  ? "Pago único · Procesado por Mercado Pago"
+                  : "Pago único"}
+              </p>
               <Button asChild>
                 <Link href="/consulta">
                   Consultar placa <ArrowRight size={18} aria-hidden="true" />
@@ -305,7 +313,7 @@ export default function Home() {
             ],
             [
               "¿Cuándo recibiré el reporte?",
-              "Después de la validación manual del pago y la consulta a las fuentes habilitadas.",
+              "Después de confirmar el pago y consultar las fuentes habilitadas. El estado del pedido se actualiza automáticamente.",
             ],
             [
               "¿Qué ocurre si una fuente falla?",
