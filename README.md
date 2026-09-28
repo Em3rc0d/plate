@@ -1,8 +1,18 @@
-# Vehicle Intelligence PE — V0.2 finishing batch
+# PlacaClara
 
-Monolito Next.js 16.3.6 / Node >=22 / TypeScript strict / Supabase / React PDF. Conserva el diseño previo. Sin tests, CI, cron ni microservicios por instrucción del usuario.
+PlacaClara es una aplicación web para consultar y consolidar evidencia vehicular disponible en Perú antes de una compra. El producto presenta datos documentales, fuentes, cobertura y limitaciones; no sustituye una revisión mecánica, certificación registral ni asesoría legal.
 
-## Ejecución
+## Stack
+
+- Next.js 16 + React 19 + TypeScript strict
+- Supabase PostgreSQL, Auth y Storage privado
+- Mercado Pago Checkout API
+- Masitaprex + PlacApi mediante adaptadores server-side
+- React PDF
+- Resend para entrega por correo
+- Vercel como runtime objetivo
+
+## Desarrollo local
 
 ```sh
 pnpm install --frozen-lockfile
@@ -10,14 +20,48 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-NEXT_PUBLIC_SITE_URL debe coincidir exactamente con el origen del entorno. Sin credenciales la web funciona, proveedores NOT_CONFIGURED y compras bloqueadas por falta de infraestructura/proveedor/pago. Resend no bloquea una compra: la entrega web/PDF permanece disponible y email_status=NOT_CONFIGURED.
+Validación mínima:
+
+```sh
+pnpm lint
+pnpm typecheck
+pnpm build
+node --test tests/payment-safety.test.mjs
+```
+
+Las pruebas SQL de pagos se ejecutan únicamente en una base aislada. Nunca ejecutar fixtures de test contra producción.
+
+## Estructura
+
+```text
+app/          páginas y Route Handlers de Next.js
+components/   UI agrupada por superficie
+src/          dominio, servicios e integraciones
+supabase/     migraciones y snapshot inicial
+tests/        contratos y seguridad de pagos
+docs/         operación, referencias y evidencia histórica
+public/       assets estáticos
+```
+
+El mapa detallado y las reglas de dependencia están en [docs/REPOSITORY-MAP.md](docs/REPOSITORY-MAP.md).
+
+## Configuración
+
+Todas las variables soportadas están documentadas en [`.env.example`](.env.example). Los secretos se configuran únicamente en el entorno y nunca se versionan.
+
+Controles operativos especialmente sensibles:
+
+- `MERCADO_PAGO_LIVE_MODE`
+- `VEHICLE_PROVIDER_EXECUTION_ENABLED`
+- `YAPE_CHECKOUT_ENABLED`
+- `PREVIEW_PROVIDER_MODE`
+- `REPORT_PRICE_PEN`
+
+Cambiar variables en Vercel requiere un deployment nuevo para que el runtime las reciba.
 
 ## Base de datos
 
-Aplicar las dos migraciones en orden, no solo la inicial:
-
-1. supabase/migrations/20260926025742_initial_vehicle_platform.sql
-2. supabase/migrations/20260926040731_finishing_launch_controls.sql
+La fuente canónica del esquema evolutivo es `supabase/migrations/`. Aplicar las migraciones en orden:
 
 ```sh
 pnpm exec supabase login
@@ -25,63 +69,59 @@ pnpm exec supabase link --project-ref YOUR_PROJECT_REF
 pnpm exec supabase db push
 ```
 
-No se aplicó migración remota durante este batch. supabase/schema.sql es referencia de la migración inicial, no un esquema completo actualizado ni una tercera migración. Aplicar mediante CLI o SQL Editor, no ejecutar schema.sql además de las migraciones. La segunda retira las RPC de generación antiguas: desplegar aplicación y migración coordinadamente, sin aprobaciones en curso. Los consentimientos históricos quedan null; no se inventa aceptación retroactiva.
+`supabase/schema.sql` representa el bootstrap inicial y no reemplaza las migraciones posteriores. No ejecutarlo adicionalmente como una migración independiente.
 
-## Admin
+Las migraciones existentes cubren plataforma inicial, controles de lanzamiento, índices, Libro de Reclamaciones, Mercado Pago, aislamiento TEST y métricas financieras.
 
-Crear usuario confirmado en Supabase Auth y asignar rol desde SQL Editor con UUID real:
+## Seguridad de pagos
 
-```sql
-update auth.users
-set raw_app_meta_data=coalesce(raw_app_meta_data,'{}'::jsonb)||'{"role":"admin"}'::jsonb
-where id='UUID-DEL-USUARIO'::uuid;
-```
+Un pago aprobado y un reporte generado son estados distintos. Un fallo posterior al cobro nunca debe iniciar un segundo pago.
 
-No se autoriza por user_metadata ni por correo. Mantener registro público cerrado. /admin/readiness lista configuración sin secretos; /admin/providers/probe diagnostica llamadas reales.
+El backend valida el snapshot de Mercado Pago, mantiene idempotencia en `payment_attempts`, concilia por provider payment ID y bloquea fulfillment de pagos TEST. Las llamadas a proveedores tienen además un kill switch independiente.
 
-## Configuración
+Yape permanece feature-gated mientras no esté certificado.
 
-.env.example contiene los contratos originales y las nuevas opciones de negocio, política, retención, preview y recuperación. Al menos un proveedor y un método de pago (nombre + teléfono) habilitan pedidos con DB. QR opcional. SUPPORT_EMAIL y PRIVACY_EMAIL son canales públicos; BUSINESS_LEGAL_NAME/RUC/ADDRESS y BOOK_OF_CLAIMS_URL no se inventan. Completar y revisar antes de apertura.
+## Proveedores y costo
 
-Resend/remitente, OpenAI, PostHog y Sentry son opcionales. Las políticas tienen versiones registradas al checkout. Actualizar TERMS_VERSION/PRIVACY_VERSION al modificar materialmente esas políticas. Los textos describen el comportamiento; no equivalen a revisión jurídica ni acreditan autorización comercial de fuentes.
+- Masitaprex: evidencia registral.
+- PlacApi: SOAT, CITV y papeletas; identidad vehicular puede actuar como fallback.
+- ConsultaDatos: fallback registral cuando esté configurado y validado.
 
-## Recuperación y entrega
+Los costos se registran en `provider_calls`. Una actualización de fuentes sobre un reporte existente debe reutilizar la evidencia registral almacenada y refrescar únicamente las fuentes dinámicas requeridas.
 
-- /api/admin/orders/[id]/reprocess: POST admin + Origin, JSON {requestId:UUID,forceRefresh:false}. Solo pedido pagado. Reintentos con el mismo UUID son idempotentes.
-- Umbral REPORT_PROCESSING_STALE_MINUTES=10, mínimo 6 minutos por request máximo de 300 segundos. No recuperar intentos frescos.
-- Un reporte existente se conserva y se entrega sin proveedores. forceRefresh=true es explícito, puede consumir saldo y genera una nueva revisión conservando enlaces/snapshots.
-- /api/admin/reports/[id]/redeliver: POST {pdfOnly:false}; no llama proveedores. Si email SENT, no vuelve a enviar. pdfOnly=true solo intenta PDF faltante/fallido.
-- Los tokens de intento impiden commits tardíos. No es una cola durable; acciones externas ya en vuelo no se pueden deshacer.
+La sonda administrativa realiza llamadas reales: no usarla como health check gratuito.
 
-## Privacidad y retención
+## Reportes y entrega
 
-/reporte/[publicCode] es privado por secreto bearer. El botón crea /compartir/[shareCode] independiente y sin propietario/documentos/datos del pedido. Nunca compartir el enlace privado creyendo que es la vista reducida. Revocar un reporte completo mediante expires_at; revocar solo compartición poniendo share_code=null con administración de DB.
+La misma estructura canónica alimenta reporte web y PDF. La entrega puede usar Resend; si el correo falla, el reporte ya persistido continúa disponible.
 
-PAYMENT_PROOF_RETENTION_DAYS y REPORT_RETENTION_DAYS vacíos: sin borrado automático. La herramienta en readiness calcula y ejecuta lotes manuales de hasta 100 por grupo. REPORT_RETENTION_DAYS afecta PDF, no report_json. Nunca elimina pedidos/contabilidad. Las políticas deben ser confirmadas por el operador antes de definir plazos. No hay cron.
+- enlace privado: puede contener identidad registral;
+- enlace compartible: DTO saneado sin identidad del propietario ni datos de pago;
+- PDF: storage privado y ruta controlada.
 
-## Preview y capacidades
+Redelivery/PDF no deben volver a consultar proveedores.
 
-NONE solo valida placa; BASIC usa identidad económica/caché; FULL habilita registro profundo de forma explícita. Ningún modo muestra propietario. CoverageList usa src/config/providers.ts. Robo, captura, siniestros, GNV y valorización existen como secciones NOT_CONFIGURED; no se venden ni se simulan.
+## Documentación
 
-## Vercel
+Empieza en [docs/README.md](docs/README.md).
 
-Framework Next.js, Node >=22. Instalar pnpm install --frozen-lockfile; build pnpm build. Configurar env por entorno y NEXT_PUBLIC_SITE_URL real. Confirmar soporte del plan para maxDuration=300. Configurar API keys únicamente servidor. No se desplegó porque no se aportó destino/cuenta/credenciales.
+Documentos principales:
 
-## Validación
+- [ARCHITECTURE.md](ARCHITECTURE.md)
+- [DESIGN.md](DESIGN.md)
+- [PROVIDERS.md](PROVIDERS.md)
+- [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md)
+- [docs/OPERATIONS.md](docs/OPERATIONS.md)
 
-```sh
-pnpm lint
-pnpm typecheck
-pnpm build
-```
+Los documentos de certificaciones o batches anteriores son evidencia histórica y no deben interpretarse como estado vigente del runtime.
 
-No se crearon ni ejecutaron tests. Compilación y tipos no acreditan integración externa. LAUNCH-CHECKLIST.md contiene los pasos manuales y la compra interna. docs/GOLDEN-AKE473.md es referencia previa aportada, no datos actuales certificados ni fixture de producción.
+## Regla de cambios
 
-## Documentos
+Antes de promover cambios de pago, proveedores, reportes o SQL:
 
-ARCHITECTURE.md · DESIGN.md · PROVIDERS.md · BUILD-STATUS.md · LAUNCH-CHECKLIST.md · docs/GOLDEN-AKE473.md.
-
-
-
-
-
+1. mantenerlos aislados en Preview;
+2. validar lint, tipos y build;
+3. comprobar idempotencia y número de llamadas pagadas;
+4. revisar métricas/costos;
+5. cerrar el checklist operativo;
+6. recién después promover a producción.
