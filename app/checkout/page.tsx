@@ -28,19 +28,20 @@ export default async function Page({
       <Header />
       <main id="main" className="wrap page">
         <p className="eyebrow">02 / Tu pedido</p>
-        <h1>Revisa tu reporte antes de pagar.</h1>
+        <h1>Confirma qué vas a recibir antes de pagar.</h1>
         <div className="two-col">
           <aside className="card checkout-summary">
             <div className="plate">{plate}</div>
             <h2>{offeringName()}</h2>
             <p className="micro">
-              Información documental de las fuentes habilitadas, con fecha y
-              limitaciones.
+              Esta es la cobertura disponible para esta placa. El reporte
+              mostrará qué información devolvió cada fuente, cuándo fue
+              consultada y qué quedó sin comprobar.
             </p>
             <div className="price">
               <small>S/</small> {env.REPORT_PRICE_PEN.toFixed(2)}
             </div>
-            <p className="muted">Pago único por esta placa.</p>
+            <p className="muted">Precio de lanzamiento · pago único por esta placa.</p>
             <CoverageList />
             <p className="notice">
               {mercadoPagoConfigured
@@ -48,7 +49,9 @@ export default async function Page({
                 : "Validación manual del pago. La entrega comienza después de aprobar el comprobante."}
             </p>
             <p className="micro">
-              No reemplaza una revisión mecánica ni certificación registral.
+              Si una fuente no responde o una cobertura no está habilitada, el
+              reporte lo indicará. No reemplaza una revisión mecánica ni una
+              certificación registral.
             </p>
           </aside>
           <section className="card">

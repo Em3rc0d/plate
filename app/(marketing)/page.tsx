@@ -28,13 +28,13 @@ import {
 export const metadata: Metadata = {
   title: "Reporte vehicular por placa en Perú",
   description:
-    "Revisa información vehicular por placa antes de comprar un usado: identidad, registro, SOAT, CITV y papeletas según la cobertura habilitada, con fuente y fecha.",
+    "Reporte vehicular por placa en Perú para revisar un auto usado antes de pagar: identidad, registro, SOAT, CITV y papeletas según cobertura, con fuente y fecha.",
   alternates: { canonical: publicSiteUrl },
   openGraph: {
     url: publicSiteUrl,
     title: "Reporte vehicular por placa en Perú | PlacaClara",
     description:
-      "Revisa información vehicular con fuente, fecha y cobertura clara antes de comprar un usado.",
+      "Antes de pagar por ese auto, revisa la placa y la información vehicular disponible con fuente, fecha y cobertura clara.",
     images: [
       {
         url: "/placaclara-hero-master.webp",
@@ -119,27 +119,27 @@ export default function Home() {
       <section className="master-hero">
         <div className="wrap master-hero-grid">
           <div className="master-hero-copy">
-            <p className="master-kicker">INFORMACIÓN VEHICULAR EN PERÚ</p>
+            <p className="master-kicker">REPORTE VEHICULAR POR PLACA · PERÚ</p>
             <h1>
-              Antes de comprar un usado, revisa sus registros.
+              Antes de pagar por ese auto, revisa la placa.
             </h1>
             <p className="master-lead">
-              Consulta la información vehicular disponible, con fuente, fecha
-              y límites claros antes de tomar una decisión.
+              Encontraste el auto. Ahora revisa qué dicen sus registros y qué
+              quedó por comprobar antes de cerrar la compra.
             </p>
 
             <PlateForm />
 
             <div className="master-price-line">
+              <span>Oferta de lanzamiento</span>
               <strong>S/ {env.REPORT_PRICE_PEN.toFixed(2)}</strong>
               <span>· Pago único</span>
-              <span>· Cobertura visible antes de pagar</span>
             </div>
 
             <div className="master-trust-row" aria-label="Señales de confianza">
               <span>
                 <SearchCheck size={18} aria-hidden="true" />
-                Consulta antes de pagar
+                Cobertura visible antes de pagar
               </span>
               <span>
                 <ShieldCheck size={18} aria-hidden="true" />
@@ -149,7 +149,7 @@ export default function Home() {
               </span>
               <span>
                 <LockKeyhole size={18} aria-hidden="true" />
-                Datos sensibles enmascarados
+                Fuente y fecha por sección
               </span>
             </div>
           </div>
@@ -192,10 +192,10 @@ export default function Home() {
         <div className="wrap">
           <div className="master-section-heading">
             <div>
-              <h2>Qué incluye tu reporte</h2>
+              <h2>Qué puedes revisar antes de comprar</h2>
               <p>
-                Información clara y organizada para revisar mejor un vehículo
-                antes de comprar.
+                La cobertura depende de las fuentes habilitadas. Cada resultado
+                conserva su contexto y sus limitaciones.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -243,8 +243,8 @@ export default function Home() {
             <p className="eyebrow">UN DOCUMENTO PARA REVISAR</p>
             <h2>Así se ve el reporte.</h2>
             <p className="muted">
-              Cada sección muestra qué se obtuvo, de dónde viene, cuándo se
-              consultó y qué limitaciones tiene.
+              No se trata solo de encontrar datos. También ves qué respondió
+              cada fuente, cuándo se consultó y qué quedó abierto.
             </p>
             <p className="micro">
               La muestra usa datos ficticios. Tu reporte real refleja únicamente
@@ -311,9 +311,9 @@ export default function Home() {
               ))}
             </div>
             <p className="limitation">
-              PlacaClara consolida información documental disponible. No
-              inspecciona el vehículo físicamente y no sustituye una
-              certificación registral.
+              Lo que no pudimos comprobar también importa. PlacaClara consolida
+              información documental disponible; no inspecciona el vehículo
+              físicamente ni sustituye una certificación registral.
             </p>
           </div>
         </div>
@@ -323,16 +323,16 @@ export default function Home() {
         <div className="wrap">
           <div className="purchase-sheet">
             <div>
-              <p className="eyebrow">UN REPORTE PARA UNA PLACA</p>
+              <p className="eyebrow">UNA REVISIÓN PARA ESTA PLACA</p>
               <h2>{offeringName()}</h2>
               <p className="muted">
-                Información documental para hacer mejores preguntas antes de
-                comprar.
+                Revisa la cobertura disponible antes de pagar y decide si
+                quieres continuar.
               </p>
               <CoverageList />
             </div>
             <div className="purchase-total">
-              <p className="document-label">PRECIO POR REPORTE</p>
+              <p className="document-label">OFERTA DE LANZAMIENTO</p>
               <div className="price">
                 <small>S/</small> {env.REPORT_PRICE_PEN.toFixed(2)}
               </div>
@@ -343,7 +343,7 @@ export default function Home() {
               </p>
               <Button asChild>
                 <Link href="/consulta">
-                  Consultar placa <ArrowRight size={18} aria-hidden="true" />
+                  Revisar placa <ArrowRight size={18} aria-hidden="true" />
                 </Link>
               </Button>
             </div>
@@ -388,6 +388,10 @@ export default function Home() {
           <p className="eyebrow">PREGUNTAS FRECUENTES</p>
           <h2>Antes de consultar</h2>
           {[
+            [
+              "¿Por qué pagar si existen consultas gratuitas?",
+              "Puedes consultar fuentes por tu cuenta. PlacaClara cobra por reunir la información disponible, organizarla para una compra y mostrar también la cobertura, procedencia y límites de cada resultado.",
+            ],
             [
               "¿Confirma que el auto está en buen estado?",
               "No. El reporte reúne información documental disponible. La condición mecánica requiere una inspección independiente.",

@@ -200,7 +200,7 @@ function buildHtml(row: ReportRow, reportUrl: string, pdfUrl: string) {
 <html lang="es">
   <body style="margin:0;padding:0;background:#F6F3EC;font-family:Arial,Helvetica,sans-serif;color:#102537;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-      Tu reporte vehicular de ${plate} está listo para revisar.
+      Tu revisión documental de ${plate} está lista.
     </div>
 
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#F6F3EC;margin:0;padding:0;">
@@ -221,13 +221,13 @@ function buildHtml(row: ReportRow, reportUrl: string, pdfUrl: string) {
                 </table>
 
                 <div style="margin-top:30px;font-size:12px;line-height:18px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8FD0C8;">
-                  Tu consulta está lista
+                  Tu revisión documental está lista
                 </div>
                 <div style="margin-top:9px;font-size:31px;line-height:38px;font-weight:800;">
-                  Tu reporte de ${plate} ya está disponible
+                  Ya puedes revisar qué encontramos para ${plate}
                 </div>
                 <div style="margin-top:12px;font-size:15px;line-height:24px;color:#D8E0E4;">
-                  Revisa la información disponible del vehículo, sus fuentes y las limitaciones de cobertura antes de tomar una decisión.
+                  Revisa qué información obtuvimos, qué fuente respondió y qué puntos quedaron abiertos antes de tomar una decisión sobre el vehículo.
                 </div>
               </td>
             </tr>
@@ -326,7 +326,7 @@ function buildHtml(row: ReportRow, reportUrl: string, pdfUrl: string) {
                   </tr>
                 </table>
                 <div style="margin-top:8px;font-size:12px;line-height:18px;color:#596873;">
-                  El reporte contiene la información devuelta por las fuentes consultadas. La trazabilidad y las limitaciones aparecen dentro del documento sin repetir metadata técnica innecesaria.
+                  Empieza por las observaciones y por cualquier sección marcada como no disponible, en conflicto o pendiente de revisión.
                 </div>
               </td>
             </tr>
@@ -406,7 +406,7 @@ export async function sendReport(
       from: env.REPORT_FROM_EMAIL,
       to: email,
       ...(env.SUPPORT_EMAIL ? { replyTo: env.SUPPORT_EMAIL } : {}),
-      subject: `Tu reporte vehicular de ${plate} está listo · ${productName}`,
+      subject: `Tu revisión de ${plate} está lista · ${productName}`,
       html: buildHtml(row, reportUrl, pdfUrl),
       text: buildText(row, reportUrl, pdfUrl),
     },

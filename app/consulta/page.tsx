@@ -18,10 +18,10 @@ export default async function Page({
       <Header />
       <main id="main" className="wrap page">
         <div className="narrow">
-          <p className="eyebrow">01 / Consulta</p>
-          <h1>Empecemos por tu placa.</h1>
+          <p className="eyebrow">01 / Revisión de placa</p>
+          <h1>Primero, revisemos qué podemos consultar para esta placa.</h1>
           <p className="muted">
-            Revisa la disponibilidad y la cobertura del reporte antes de pagar.
+            Verás la cobertura disponible antes de pagar.
           </p>
           <Preview
             initial={(plate || "").slice(0, 12)}

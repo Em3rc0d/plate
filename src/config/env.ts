@@ -33,7 +33,7 @@ export const env = z
       z.string().default("Vehicle Intelligence PE"),
     ),
     NEXT_PUBLIC_SITE_URL: siteUrl,
-    REPORT_PRICE_PEN: amount(15.9),
+    REPORT_PRICE_PEN: amount(9.9),
     LAUNCH_PROFILE: z.preprocess(
       blankAsUndefined,
       z.enum(["REGISTRY_LEAN", "FULL"]).default("REGISTRY_LEAN"),

@@ -31,7 +31,7 @@ export function documentarySummary(r: CanonicalVehicleReport) {
     label: partial
       ? "Reporte parcial"
       : review
-        ? "Requiere revisión de hallazgos"
-        : "Documentalmente sin hallazgos críticos detectados",
+        ? "Hay observaciones para revisar"
+        : "Sin observaciones adicionales en la evidencia consultada",
   };
 }

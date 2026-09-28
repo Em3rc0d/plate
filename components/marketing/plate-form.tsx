@@ -50,11 +50,11 @@ export function PlateForm() {
           aria-describedby={error ? "plate-hint plate-error" : "plate-hint"}
         />
         <Button type="submit">
-          Consultar placa <ArrowRight size={18} aria-hidden="true" />
+          Revisar placa <ArrowRight size={18} aria-hidden="true" />
         </Button>
       </div>
       <p id="plate-hint" className="hint">
-        Ingresa una placa real para consultar disponibilidad. XYZ-753 es solo un ejemplo visual.
+        Ingresa una placa real para revisar cobertura. XYZ-753 es solo un ejemplo visual.
       </p>
       {error && (
         <p id="plate-error" role="alert" className="error">

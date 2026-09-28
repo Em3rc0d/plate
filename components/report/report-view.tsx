@@ -179,7 +179,7 @@ export function ReportView({ row }: { row: ReportRow }) {
         : "Datos registrales de la consulta",
     },
     {
-      label: "Cobertura pendiente",
+      label: "CITV y papeletas",
       status:
         inspection?.state === "VERIFIED" && fines?.state === "VERIFIED"
           ? "Información disponible"
@@ -242,7 +242,7 @@ export function ReportView({ row }: { row: ReportRow }) {
           <div className={styles.sectionHeading}>
             <div>
               <p className={styles.kicker}>Resumen del reporte</p>
-              <h2>Lo principal de esta consulta</h2>
+              <h2>Qué encontramos en esta revisión</h2>
             </div>
           </div>
 
@@ -274,7 +274,7 @@ export function ReportView({ row }: { row: ReportRow }) {
 
         <div className={styles.sectionTitle}>
           <div>
-            <p className={styles.kicker}>01 · Evidencia disponible</p>
+            <p className={styles.kicker}>01 · Evidencia consultada</p>
             <h2>Datos del vehículo y situación registral</h2>
           </div>
           <p>
@@ -404,7 +404,7 @@ export function ReportView({ row }: { row: ReportRow }) {
             ))
           ) : (
             <p className={styles.empty}>
-              No se registraron hallazgos adicionales en la evidencia disponible.
+              No se registraron observaciones adicionales dentro de la evidencia consultada.
             </p>
           )}
         </section>

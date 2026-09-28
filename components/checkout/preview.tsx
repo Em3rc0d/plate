@@ -76,7 +76,7 @@ export function Preview({
           />
         </label>
         <Button disabled={busy}>
-          {busy ? "Consultando…" : "Revisar disponibilidad"}
+          {busy ? "Consultando…" : "Revisar cobertura"}
         </Button>
       </form>
       {error && (
@@ -100,7 +100,7 @@ export function Preview({
                 ? "están disponibles para consulta, sujetas a su respuesta."
                 : "aún no están habilitadas para consulta."}
             </p>
-            <h3>Cobertura del reporte</h3>
+            <h3>Cobertura disponible para esta placa</h3>
             <ul className="coverage-items">
               {coverage.map((label) => (
                 <li key={label}>{label}</li>
@@ -111,11 +111,16 @@ export function Preview({
               reemplaza una revisión mecánica.
             </p>
             {ready && Object.values(result.availableSources).some(Boolean) ? (
-              <Button asChild>
-                <Link href={`/checkout?plate=${result.plate}`}>
-                  Obtener reporte — S/{result.price.toFixed(2)}
-                </Link>
-              </Button>
+              <>
+                <p>
+                  <strong>Precio de lanzamiento: S/{result.price.toFixed(2)}</strong>
+                </p>
+                <Button asChild>
+                  <Link href={`/checkout?plate=${result.plate}`}>
+                    Continuar con el reporte
+                  </Link>
+                </Button>
+              </>
             ) : (
               <p className="notice">
                 La compra todavía no está disponible. No se ha realizado ningún
