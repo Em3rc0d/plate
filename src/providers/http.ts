@@ -79,7 +79,10 @@ export async function call(
           ...base,
           status: "UNAVAILABLE",
           errorCode: `HTTP_${response.status}`,
-          cost: config.cost,
+          // An explicit payment-required response means the provider did not
+          // execute a billable query. Keep other failures conservative because
+          // a timeout/5xx may happen after the upstream accepted the request.
+          cost: response.status === 402 ? 0 : config.cost,
         };
       } else {
         const raw = obj(await response.json());
