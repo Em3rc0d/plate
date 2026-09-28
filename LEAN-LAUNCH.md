@@ -1,5 +1,7 @@
 # Lean Launch — Vehicle Intelligence PE
 
+> **Documento histórico.** Conservado como evidencia del estado/decisiones de ese momento. Para operación vigente usa [docs/README.md](docs/README.md) y [docs/OPERATIONS.md](docs/OPERATIONS.md).
+
 ## Fixed-cost policy
 
 Launch with only:
