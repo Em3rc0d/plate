@@ -59,6 +59,22 @@ export const env = z
     NEXT_PUBLIC_POSTHOG_HOST: optional,
     SENTRY_DSN: optional,
     NEXT_PUBLIC_SENTRY_DSN: optional,
+    NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY: optional,
+    MERCADO_PAGO_ACCESS_TOKEN: optional,
+    MERCADO_PAGO_COLLECTOR_ID: optional,
+    MERCADO_PAGO_WEBHOOK_SECRET: optional,
+    MERCADO_PAGO_LIVE_MODE: z.preprocess(
+      (v) => (v === "true" || v === true ? true : false),
+      z.boolean().default(false),
+    ),
+    YAPE_CHECKOUT_ENABLED: z.preprocess(
+      (v) => v === "true" || v === true,
+      z.boolean().default(false),
+    ),
+    VEHICLE_PROVIDER_EXECUTION_ENABLED: z.preprocess(
+      (v) => v === "true" || v === true,
+      z.boolean().default(false),
+    ),
     YAPE_DISPLAY_NAME: optional,
     YAPE_PHONE: optional,
     NEXT_PUBLIC_YAPE_QR_URL: optional,
@@ -120,6 +136,13 @@ export const bookOfClaimsUrl =
 export const databaseConfigured = !!(
   env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
 );
+export const mercadoPagoConfigured = !!(
+  env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY &&
+  env.MERCADO_PAGO_ACCESS_TOKEN &&
+  env.MERCADO_PAGO_COLLECTOR_ID &&
+  env.MERCADO_PAGO_WEBHOOK_SECRET
+);
+
 export const providerConfigured = !!(
   env.MASITAPREX_API_KEY ||
   env.CONSULTADATOS_TOKEN ||

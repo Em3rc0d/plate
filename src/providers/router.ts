@@ -58,3 +58,26 @@ export async function routeProviders(plate: string, id: string) {
         ],
   );
 }
+
+
+export async function refreshDynamicProviders(plate: string, id: string) {
+  const tasks = (["SOAT", "CITV", "FINES_NATIONAL"] as const).map((cap) =>
+    adapters[candidates(cap)[0].id](plate, id),
+  );
+  const settled = await Promise.allSettled(tasks);
+  return settled.map((result, index) =>
+    result.status === "fulfilled"
+      ? result.value
+      : {
+          provider: "Router",
+          endpoint: "internal",
+          section: (["insurance", "inspection", "fines"] as const)[index],
+          status: "UNAVAILABLE" as const,
+          data: {},
+          checkedAt: new Date().toISOString(),
+          originalSource: "Consulta interrumpida",
+          cost: 0,
+          errorCode: "ROUTER_FAILURE",
+        },
+  );
+}

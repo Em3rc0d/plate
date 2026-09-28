@@ -2,7 +2,8 @@ import { processingAge, isStale } from "@/src/orders/recovery";
 import { requireAdmin } from "@/src/db/admin";
 import { db, checked } from "@/src/db/client";
 import { labels } from "@/src/config/product";
-import { OrderActions } from "@/components/admin/actions";
+import { OrderActions, PdfRuntimeCheck } from "@/components/admin/actions";
+import { env } from "@/src/config/env";
 import type { OrderRow } from "@/src/vehicle/canonical";
 import Link from "next/link";
 export default async function Page({
@@ -35,6 +36,21 @@ export default async function Page({
   return (
     <>
       <h2>Pedidos</h2>
+      <div className="card" style={{ marginBottom: 18 }}>
+        <p>
+          <strong>Certificación de entrega</strong>
+        </p>
+        <p className="micro">
+          El smoke test de PDF no consulta proveedores ni consume Masitaprex.
+        </p>
+        <PdfRuntimeCheck />
+        {!env.VEHICLE_PROVIDER_EXECUTION_ENABLED && (
+          <p className="notice">
+            Proveedores bloqueados: los pedidos pagados no se reprocesarán hasta
+            habilitar VEHICLE_PROVIDER_EXECUTION_ENABLED.
+          </p>
+        )}
+      </div>
       <form className="flex">
         <label>
           Estado{" "}
@@ -78,6 +94,13 @@ export default async function Page({
           <p className="micro">
             {o.id} · Operación: {o.payment_reference || "No indicada"}
           </p>
+          {o.paid_at && (
+            <p>
+              <Link className="button outline" href={`/admin/orders/${o.id}`}>
+                Continuar pedido pagado
+              </Link>
+            </p>
+          )}
           {o.payment_proof_path && (
             <p>
               <a
@@ -116,6 +139,7 @@ export default async function Page({
             status={o.status}
             stale={isStale(o)}
             reportId={reports.find((r) => r.order_id === o.id)?.id}
+            providerExecutionEnabled={env.VEHICLE_PROVIDER_EXECUTION_ENABLED}
           />
           <p className="micro">
             Consentimiento: términos{" "}

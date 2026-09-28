@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   outputFileTracingIncludes: {
     "/api/admin/providers/golden": ["./docs/GOLDEN-AKE473.md"],
+    "/*": [
+      "./assets/fonts/*.ttf",
+      "./node_modules/.pnpm/pdfkit@0.20.1/node_modules/pdfkit/**/*",
+    ],
   },
   serverExternalPackages: ["@react-pdf/renderer"],
   async headers() {

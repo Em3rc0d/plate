@@ -2,7 +2,10 @@ import { upgradeReport } from "@/src/reports/upgrade";
 import "server-only";
 import { db, checked, required } from "@/src/db/client";
 import { normalizePlate } from "./normalize-plate";
-import { routeProviders } from "@/src/providers/router";
+import {
+  routeProviders,
+  refreshDynamicProviders,
+} from "@/src/providers/router";
 import { buildEvidence } from "@/src/evidence/engine";
 import { findings } from "@/src/findings/deterministic";
 import { aiSummary } from "@/src/findings/ai-summary";
@@ -14,6 +17,28 @@ import { token } from "@/src/utils/security";
 import { capture } from "@/src/observability";
 import { track } from "@/src/analytics";
 import type { CanonicalVehicleReport, ReportRow } from "./canonical";
+
+const dynamicSections = new Set(["insurance", "inspection", "fines"]);
+
+function mergeDynamicRefresh(
+  existing: CanonicalVehicleReport,
+  refreshed: CanonicalVehicleReport,
+): CanonicalVehicleReport {
+  const report = structuredClone(upgradeReport(existing));
+  report.insurance = refreshed.insurance;
+  report.inspection = refreshed.inspection;
+  report.fines = refreshed.fines;
+  report.generatedAt = refreshed.generatedAt;
+  report.evidence = [
+    ...report.evidence.filter(
+      (e) => !dynamicSections.has(e.fieldPath.split(".")[0]),
+    ),
+    ...refreshed.evidence.filter((e) =>
+      dynamicSections.has(e.fieldPath.split(".")[0]),
+    ),
+  ];
+  return upgradeReport(report);
+}
 export async function generateVehicleReport({
   plate,
   orderId,
@@ -27,6 +52,9 @@ export async function generateVehicleReport({
   recovery?: boolean;
   requestId?: string;
 }): Promise<{ status: string; reportId?: string }> {
+  if (!env.MERCADO_PAGO_LIVE_MODE) throw new Error("PAYMENT_TEST_MODE_BLOCKED");
+  if (!env.VEHICLE_PROVIDER_EXECUTION_ENABLED)
+    throw new Error("PROVIDER_EXECUTION_DISABLED");
   plate = normalizePlate(plate);
   const database = db();
   const order = required(
@@ -103,8 +131,17 @@ export async function generateVehicleReport({
       )
         report = { ...cached, generatedAt: new Date().toISOString() };
     }
-    if (!report)
-      report = buildEvidence(plate, await routeProviders(plate, query.id));
+    if (!report) {
+      if (forceRefresh && existing) {
+        const refreshed = buildEvidence(
+          plate,
+          await refreshDynamicProviders(plate, query.id),
+        );
+        report = mergeDynamicRefresh(existing.report_json, refreshed);
+      } else {
+        report = buildEvidence(plate, await routeProviders(plate, query.id));
+      }
+    }
     report = upgradeReport(report);
     report.findings = findings(report);
     for (const provider of [
@@ -165,9 +202,15 @@ export async function generateVehicleReport({
           e.value !== null,
       ) || report.evidence.some((e) => e.status === "NOT_FOUND");
     if (!meaningful) throw new Error("ALL_SOURCES_FAILED");
+    const evidenceForQuery =
+      forceRefresh && existing
+        ? report.evidence.filter((e) =>
+            dynamicSections.has(e.fieldPath.split(".")[0]),
+          )
+        : report.evidence;
     checked(
       await database.from("provider_evidence").insert(
-        report.evidence.map((e) => ({
+        evidenceForQuery.map((e) => ({
           query_id: query.id,
           field_path: e.fieldPath,
           value_json: e.value,

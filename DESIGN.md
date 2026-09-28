@@ -66,6 +66,17 @@ No transformar NOT_FOUND en inexistencia de antecedentes. No usar verde para cob
 
 Fondos negros dominantes, glow, glassmorphism, gradientes AI, fichas flotantes/inclinadas, escáneres, animaciones en bucle, scores, porcentajes de riesgo, verdictos de compra, logos oficiales, contadores ficticios o garantías de cobertura universal. Movimiento limitado a color/foco/feedback; reduced motion elimina animación y scroll suave.
 
+## Invariante de integridad del reporte
+
+El diseño nunca elimina datos canónicos devueltos por una fuente por razones de presentación.
+
+- Se conservan todos los valores útiles del snapshot: identidad vehicular, situación registral, propietario actual, historial completo de propietarios devuelto, restricciones, historial SOAT, CITV, papeletas, montos y hallazgos.
+- La UI y el PDF pueden reorganizar, humanizar y agrupar esos datos.
+- La metadata técnica repetitiva puede compactarse: paths internos, timestamps ISO crudos, estados técnicos duplicados y la misma fuente repetida campo por campo.
+- La trazabilidad mínima visible por sección es: fuente, estado y fecha de consulta.
+- Deduplicar trazabilidad no equivale a deduplicar ni resumir registros de negocio. Cada propietario, póliza, certificado o papeleta devuelta debe seguir representado.
+- Si una fuente limita su propio historial, el reporte debe conservar esa limitación en lugar de inferir registros ausentes.
+
 ## Invariantes y validación
 
 No modificar backend, migraciones, contratos, pagos, privacidad, retención, router, PDF ni variables de producción. Sin nuevas dependencias. Proveedores opcionales continúan apagados salvo configuración existente. Validar lint/typecheck/build y navegación responsive local. La comprobación visual no sustituye una prueba de comprensión con compradores reales. Versionar tokens y reglas junto a sus componentes.

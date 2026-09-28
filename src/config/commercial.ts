@@ -1,5 +1,10 @@
 import "server-only";
-import { bookOfClaimsUrl, databaseConfigured, env } from "./env";
+import {
+  bookOfClaimsUrl,
+  databaseConfigured,
+  env,
+  mercadoPagoConfigured,
+} from "./env";
 import { supports } from "./providers";
 
 export interface CommercialReadiness {
@@ -23,10 +28,12 @@ export function commercialReadiness(): CommercialReadiness {
   const soat = supports("SOAT");
   const citv = supports("CITV");
   const fines = supports("FINES_NATIONAL");
-  const payment = !!(
-    (env.YAPE_DISPLAY_NAME && env.YAPE_PHONE) ||
-    (env.PLIN_DISPLAY_NAME && env.PLIN_PHONE)
-  );
+  const payment =
+    mercadoPagoConfigured ||
+    !!(
+      (env.YAPE_DISPLAY_NAME && env.YAPE_PHONE) ||
+      (env.PLIN_DISPLAY_NAME && env.PLIN_PHONE)
+    );
   const legalIdentity = !!(env.BUSINESS_LEGAL_NAME && env.BUSINESS_RUC);
   const bookOfClaims = !!bookOfClaimsUrl;
   const reportProvider =

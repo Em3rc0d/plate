@@ -14,14 +14,14 @@ export async function POST(req: Request) {
         plate: z.string().max(20),
         email: z.string().email().max(254),
         phone: z.string().regex(/^\+?[0-9 ()-]{7,20}$/),
-        method: z.enum(["YAPE", "PLIN"]),
+        method: z.enum(["MP_YAPE", "MP_CARD", "YAPE", "PLIN"]),
         accepted: z.literal(true),
         termsVersion: z.literal(env.TERMS_VERSION),
         privacyVersion: z.literal(env.PRIVACY_VERSION),
       })
       .safeParse(await req.json());
     if (!input.success) throw new Error("INVALID_INPUT");
-    await rateLimit(req, "orders", 10);
+    await rateLimit(req, "orders", env.MERCADO_PAGO_LIVE_MODE ? 10 : 100);
     let plate: string;
     try {
       plate = normalizePlate(input.data.plate);

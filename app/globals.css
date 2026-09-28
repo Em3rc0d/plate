@@ -2397,3 +2397,35 @@ body {
   .claim-no-print, .master-header, .footer { display: none !important; }
   .claim-receipt { border: 0; padding: 0; }
 }
+
+
+/* Mercado Pago secure fields */
+.mp-secure-field {
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.mp-secure-field iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  border: 0 !important;
+}
+
+#mp-card-form .two-col {
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 640px) {
+  #mp-card-form .two-col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

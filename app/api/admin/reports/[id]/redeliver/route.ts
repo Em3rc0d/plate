@@ -16,7 +16,10 @@ export async function POST(
     sameOrigin(req);
     await requireAdmin();
     const body = z
-      .object({ pdfOnly: z.boolean().default(false) })
+      .object({
+        pdfOnly: z.boolean().default(false),
+        forceEmail: z.boolean().default(false),
+      })
       .safeParse(await req.json());
     if (!body.success) throw new Error("INVALID_INPUT");
     const row = required(
@@ -33,7 +36,12 @@ export async function POST(
       await db().from("orders").select("email").eq("id", row.order_id).single(),
     );
     return NextResponse.json(
-      await deliverReport(row, order.email, body.data.pdfOnly),
+      await deliverReport(
+        row,
+        order.email,
+        body.data.pdfOnly,
+        body.data.forceEmail,
+      ),
     );
   });
 }

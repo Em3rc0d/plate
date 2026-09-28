@@ -7,11 +7,13 @@ export function OrderActions({
   status,
   stale = false,
   reportId,
+  providerExecutionEnabled = false,
 }: {
   id: string;
   status: string;
   stale?: boolean;
   reportId?: string;
+  providerExecutionEnabled?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
@@ -27,7 +29,7 @@ export function OrderActions({
     if (
       forceRefresh &&
       !confirm(
-        "Esto vuelve a consultar proveedores y puede consumir saldo. ¿Continuar?",
+        "Esto actualiza SOAT, CITV y papeletas y puede consumir 3 créditos de PlacApi. La evidencia registral guardada se reutiliza y Masitaprex no se consulta de nuevo. ¿Continuar?",
       )
     )
       return;
@@ -44,11 +46,18 @@ export function OrderActions({
         body: JSON.stringify(
           kind === "reprocess"
             ? { forceRefresh, requestId: requestKey.current }
-            : { pdfOnly },
+            : { pdfOnly, forceEmail: kind === "redeliver" && !pdfOnly },
         ),
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data?.error === "PROVIDER_EXECUTION_DISABLED") {
+          setMessage(
+            "Proveedores bloqueados por seguridad. El pago sigue aprobado; no se hará otro cobro.",
+          );
+          requestKey.current = null;
+          return;
+        }
         if (res.status === 409) {
           setMessage(
             "El estado cambió o existe un proceso activo. Revisa el pedido.",
@@ -61,9 +70,13 @@ export function OrderActions({
       }
       requestKey.current = null;
       setMessage(
-        data.status === "FAILED"
-          ? "Requiere resolución manual; no otro pago."
-          : "Operación finalizada.",
+        kind === "redeliver" && data.emailStatus === "FAILED"
+          ? `Correo falló: ${data.emailError || "EMAIL_FAILED"}.`
+          : kind === "redeliver" && data.emailStatus === "SENT"
+            ? "Correo enviado correctamente."
+            : data.status === "FAILED"
+              ? "Requiere resolución manual; no otro pago."
+              : "Operación finalizada.",
       );
       router.refresh();
     } catch {
@@ -93,13 +106,30 @@ export function OrderActions({
       {((!reportId && ["FAILED", "PAID"].includes(status)) ||
         stale ||
         (!!reportId && status === "FAILED")) && (
-        <Button disabled={busy} onClick={() => action("reprocess")}>
-          {stale ? "Recuperar / reprocesar" : "Reprocesar"}
+        <Button
+          disabled={busy || !providerExecutionEnabled}
+          onClick={() => action("reprocess")}
+        >
+          {providerExecutionEnabled
+            ? stale
+              ? "Recuperar / reprocesar"
+              : "Reprocesar"
+            : "Reprocesar (proveedor bloqueado)"}
         </Button>
       )}
       {reportId && (
         <>
-          <Button disabled={busy} onClick={() => action("redeliver")}>
+          <Button
+            disabled={busy}
+            onClick={() => {
+              if (
+                confirm(
+                  "Esto regenerará el PDF y volverá a enviar el correo al cliente. No consulta proveedores ni consume Masitaprex/PlacApi. ¿Continuar?",
+                )
+              )
+                action("redeliver");
+            }}
+          >
             Reenviar entrega
           </Button>
           <Button
@@ -114,7 +144,7 @@ export function OrderActions({
             variant="outline"
             onClick={() => action("reprocess", true)}
           >
-            Actualizar fuentes
+            Actualizar SOAT / CITV / papeletas
           </Button>
         </>
       )}
@@ -136,5 +166,44 @@ export function Logout() {
     >
       Cerrar sesión
     </Button>
+  );
+}
+
+
+export function PdfRuntimeCheck() {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function run() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/reports/pdf-runtime-check", {
+        method: "GET",
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error();
+      setMessage(
+        `PDF runtime OK · ${Number(data.bytes || 0).toLocaleString("es-PE")} bytes · Masitaprex no ejecutado.`,
+      );
+    } catch {
+      setMessage(
+        "PDF runtime falló. No se ejecutó Masitaprex; revisa logs antes de habilitar proveedores.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex">
+      <Button disabled={busy} variant="outline" onClick={run}>
+        {busy ? "Probando PDF…" : "Probar runtime PDF"}
+      </Button>
+      <span className="micro" role="status">
+        {message}
+      </span>
+    </div>
   );
 }

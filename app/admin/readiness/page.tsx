@@ -10,7 +10,10 @@ export default async function Page() {
       <h2>
         {data.blockers
           ? `NOT READY — ${data.blockers} blockers`
-          : "READY TO SELL"}
+          : !env.MERCADO_PAGO_LIVE_MODE ||
+              !env.VEHICLE_PROVIDER_EXECUTION_ENABLED
+            ? "TEST / CONFIG READY"
+            : "READY TO SELL"}
       </h2>
       <p className="muted">
         Estado de configuración, no certificación legal ni validación de

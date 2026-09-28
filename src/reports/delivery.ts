@@ -3,7 +3,6 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { db, checked, required } from "@/src/db/client";
 import { env } from "@/src/config/env";
-import { generatePdf } from "./pdf-service";
 import { sendReport } from "@/src/email/report-ready";
 import { capture } from "@/src/observability";
 import type { ReportRow } from "@/src/vehicle/canonical";
@@ -11,6 +10,7 @@ export async function deliverReport(
   row: ReportRow,
   email: string,
   pdfOnly = false,
+  forceEmail = false,
 ) {
   const id = randomUUID();
   const claimed = checked(
@@ -27,7 +27,11 @@ export async function deliverReport(
     ) as ReportRow;
     row.report_json = upgradeReport(row.report_json);
     try {
-      await generatePdf(row);
+      // Keep PDFKit out of unrelated payment/report imports and load it only
+      // when a PDF is actually being generated. This also makes packaging
+      // failures catchable instead of crashing the whole serverless process.
+      const { generatePdf } = await import("./pdf-service");
+      await generatePdf(row, forceEmail || pdfOnly);
     } catch (error) {
       capture("pdf_failure", { report_id: row.id });
       checked(
@@ -44,14 +48,27 @@ export async function deliverReport(
           .eq("revision", row.revision),
       );
     }
-    if (!pdfOnly && row.email_status !== "SENT") {
+    let emailStatus: ReportRow["email_status"] = row.email_status;
+    let emailError: string | null = null;
+    if (!pdfOnly && (forceEmail || row.email_status !== "SENT")) {
       let status: ReportRow["email_status"] = "NOT_CONFIGURED";
       if (env.RESEND_API_KEY && env.REPORT_FROM_EMAIL) {
         try {
-          await sendReport(row, email);
+          await sendReport(
+            row,
+            email,
+            forceEmail
+              ? `report-${row.id}-v${row.revision}-manual-${id}`
+              : undefined,
+          );
           status = "SENT";
-        } catch {
-          capture("email_failure", { report_id: row.id });
+        } catch (error) {
+          const reason =
+            error instanceof Error && error.message.startsWith("RESEND_")
+              ? error.message
+              : "EMAIL_FAILED";
+          capture("email_failure", { report_id: row.id, reason });
+          emailError = reason;
           status = "FAILED";
         }
       }
@@ -62,8 +79,13 @@ export async function deliverReport(
           .eq("id", row.id)
           .eq("revision", row.revision),
       );
+      emailStatus = status;
     }
-    return { status: "DELIVERY_ATTEMPTED" };
+    return {
+      status: "DELIVERY_ATTEMPTED",
+      emailStatus,
+      emailError,
+    };
   } finally {
     checked(
       await db()

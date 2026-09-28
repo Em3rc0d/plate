@@ -4,7 +4,9 @@ import { env } from "@/src/config/env";
 import { capture } from "@/src/observability";
 export function sameOrigin(req: Request) {
   const origin = req.headers.get("origin");
-  if (origin !== new URL(env.NEXT_PUBLIC_SITE_URL).origin)
+  const requestOrigin = new URL(req.url).origin;
+  const configuredOrigin = new URL(env.NEXT_PUBLIC_SITE_URL).origin;
+  if (!origin || (origin !== requestOrigin && origin !== configuredOrigin))
     throw new Error("FORBIDDEN");
 }
 export async function handle(fn: () => Promise<Response>) {
@@ -15,7 +17,7 @@ export async function handle(fn: () => Promise<Response>) {
     const status =
       code === "PDF_EXPIRED"
         ? 410
-        : code === "UNAUTHORIZED"
+        : ["UNAUTHORIZED", "INVALID_SIGNATURE"].includes(code)
           ? 401
           : code === "FORBIDDEN"
             ? 403
@@ -23,13 +25,32 @@ export async function handle(fn: () => Promise<Response>) {
               ? 404
               : code === "RATE_LIMIT"
                 ? 429
-                : code.includes("NOT_CONFIGURED")
+                : code.includes("NOT_CONFIGURED") ||
+                    [
+                      "PAYMENT_TEST_MODE_BLOCKED",
+                      "PROVIDER_EXECUTION_DISABLED",
+                    ].includes(code)
                   ? 503
-                  : code === "CONFLICT"
+                  : [
+                        "CONFLICT",
+                        "PAYMENT_METHOD_MISMATCH",
+                        "IDEMPOTENCY_CONFLICT",
+                        "PAYMENT_ALREADY_ACTIVE",
+                      ].includes(code)
                     ? 409
-                    : code === "INVALID_INPUT"
+                    : [
+                          "INVALID_INPUT",
+                          "INVALID_IDEMPOTENCY_KEY",
+                          "INVALID_TOKEN",
+                          "INVALID_INSTRUMENT",
+                        ].includes(code)
                       ? 400
-                      : 500;
+                      : [
+                            "PROVIDER_UNAVAILABLE",
+                            "PAYMENT_RESULT_UNKNOWN",
+                          ].includes(code)
+                        ? 503
+                        : 500;
     if (status === 500) capture("route_failure");
     return NextResponse.json(
       {

@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+type PaymentMethod = "MP_YAPE" | "MP_CARD" | "YAPE" | "PLIN";
+
 export function OrderForm({
   plate,
   enabled,
@@ -13,12 +16,22 @@ export function OrderForm({
   plate: string;
   termsVersion: string;
   privacyVersion: string;
-  enabled: { YAPE: boolean; PLIN: boolean };
+  enabled: Record<PaymentMethod, boolean>;
 }) {
-  const [method, setMethod] = useState(enabled.YAPE ? "YAPE" : "PLIN"),
+  const mercadoPago = enabled.MP_YAPE || enabled.MP_CARD;
+  const initial: PaymentMethod = enabled.MP_YAPE
+    ? "MP_YAPE"
+    : enabled.MP_CARD
+      ? "MP_CARD"
+      : enabled.YAPE
+        ? "YAPE"
+        : "PLIN";
+  const [method, setMethod] = useState<PaymentMethod>(initial),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const router = useRouter();
+  const anyEnabled = Object.values(enabled).some(Boolean);
+
   return (
     <form
       aria-busy={busy}
@@ -75,37 +88,60 @@ export function OrderForm({
           required
         />
       </label>
+
       <p>Medio de pago</p>
       <Tabs
         value={method}
         onValueChange={(value) => {
-          setMethod(value);
-          browserTrack("payment_method_selected", { method: value });
+          const next = value as PaymentMethod;
+          setMethod(next);
+          browserTrack("payment_method_selected", { method: next });
         }}
       >
         <TabsList className="tab-list" aria-label="Medio de pago">
-          <TabsTrigger value="YAPE" disabled={!enabled.YAPE}>
-            Yape
-          </TabsTrigger>
-          <TabsTrigger value="PLIN" disabled={!enabled.PLIN}>
-            Plin
-          </TabsTrigger>
+          {mercadoPago ? (
+            <>
+              {enabled.MP_YAPE && (
+                <TabsTrigger value="MP_YAPE">Yape</TabsTrigger>
+              )}
+              {enabled.MP_CARD && (
+                <TabsTrigger value="MP_CARD">Tarjeta</TabsTrigger>
+              )}
+            </>
+          ) : (
+            <>
+              {enabled.YAPE && <TabsTrigger value="YAPE">Yape</TabsTrigger>}
+              {enabled.PLIN && <TabsTrigger value="PLIN">Plin</TabsTrigger>}
+            </>
+          )}
         </TabsList>
+
+        <TabsContent value="MP_YAPE">
+          <p className="micro">
+            Paga con Yape mediante Mercado Pago. El siguiente paso solicitará tu
+            celular y el OTP generado por Yape.
+          </p>
+        </TabsContent>
+        <TabsContent value="MP_CARD">
+          <p className="micro">
+            Paga con tarjeta de crédito o débito en campos seguros de Mercado
+            Pago. PlacaClara no recibe tu número de tarjeta ni CVV.
+          </p>
+        </TabsContent>
         <TabsContent value="YAPE">
           <p className="micro">
-            {enabled.YAPE
-              ? "En el siguiente paso verás los datos para pagar con Yape y adjuntar tu comprobante."
-              : "Yape no está disponible para este pedido."}
+            En el siguiente paso verás los datos para pagar con Yape y adjuntar
+            tu comprobante.
           </p>
         </TabsContent>
         <TabsContent value="PLIN">
           <p className="micro">
-            {enabled.PLIN
-              ? "En el siguiente paso verás los datos para pagar con Plin y adjuntar tu comprobante."
-              : "Plin no está disponible para este pedido."}
+            En el siguiente paso verás los datos para pagar con Plin y adjuntar
+            tu comprobante.
           </p>
         </TabsContent>
       </Tabs>
+
       <label
         className="flex checkout-consent"
         style={{ margin: "22px 0", alignItems: "flex-start", fontSize: 14 }}
@@ -123,7 +159,7 @@ export function OrderForm({
           y condiciones del reporte.
         </span>
       </label>
-      <Button disabled={busy || (!enabled.YAPE && !enabled.PLIN)}>
+      <Button disabled={busy || !anyEnabled}>
         {busy ? "Creando pedido…" : "Continuar al pago"}
       </Button>
       {error && (

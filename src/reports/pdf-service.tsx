@@ -4,7 +4,7 @@ import { db, checked, required } from "@/src/db/client";
 import { PdfDocument } from "./pdf-document";
 import type { ReportRow } from "@/src/vehicle/canonical";
 import { env } from "@/src/config/env";
-export async function generatePdf(row: ReportRow) {
+export async function generatePdf(row: ReportRow, force = false) {
   if (
     row.pdf_deleted_at ||
     (env.REPORT_RETENTION_DAYS &&
@@ -12,7 +12,8 @@ export async function generatePdf(row: ReportRow) {
         Date.now())
   )
     throw new Error("PDF_EXPIRED");
-  if (row.pdf_path) {
+  const path = `${row.id}/report-v${row.revision}-dossier-v2.pdf`;
+  if (row.pdf_path === path && !force) {
     const existing = await db()
       .storage.from("report-pdfs")
       .download(row.pdf_path);
@@ -36,8 +37,12 @@ export async function generatePdf(row: ReportRow) {
       throw new Error("PDF_STORAGE_UNAVAILABLE");
   }
 
-  const buffer = await renderToBuffer(<PdfDocument row={row} />);
-  const path = `${row.id}/report-v${row.revision}.pdf`;
+  const buffer = await renderToBuffer(
+    <PdfDocument
+      row={row}
+      verificationUrl={`${env.NEXT_PUBLIC_SITE_URL}/verificar/${row.share_code || row.public_code}`}
+    />,
+  );
   checked(
     await db()
       .storage.from("report-pdfs")
@@ -46,7 +51,17 @@ export async function generatePdf(row: ReportRow) {
   const changed = required(
     await db()
       .from("reports")
-      .update({ pdf_path: path, pdf_status: "READY" })
+      .update({
+        pdf_path: path,
+        pdf_status: "READY",
+        ...(row.pdf_path && row.pdf_path !== path
+          ? {
+              retired_pdf_paths: [
+                ...new Set([...(row.retired_pdf_paths || []), row.pdf_path]),
+              ],
+            }
+          : {}),
+      })
       .eq("id", row.id)
       .eq("revision", row.revision)
       .is("pdf_deleted_at", null)

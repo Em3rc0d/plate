@@ -147,6 +147,7 @@ export interface ReportRow {
   created_at: string;
   expires_at: string | null;
   pdf_path: string | null;
+  retired_pdf_paths?: string[];
   summary_json: unknown;
   total_data_cost_pen: number;
   email_status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
