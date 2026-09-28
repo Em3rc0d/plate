@@ -47,14 +47,21 @@ export async function deliverReport(
           .eq("revision", row.revision),
       );
     }
+    let emailStatus: ReportRow["email_status"] = row.email_status;
+    let emailError: string | null = null;
     if (!pdfOnly && row.email_status !== "SENT") {
       let status: ReportRow["email_status"] = "NOT_CONFIGURED";
       if (env.RESEND_API_KEY && env.REPORT_FROM_EMAIL) {
         try {
           await sendReport(row, email);
           status = "SENT";
-        } catch {
-          capture("email_failure", { report_id: row.id });
+        } catch (error) {
+          const reason =
+            error instanceof Error && error.message.startsWith("RESEND_")
+              ? error.message
+              : "EMAIL_FAILED";
+          capture("email_failure", { report_id: row.id, reason });
+          emailError = reason;
           status = "FAILED";
         }
       }
@@ -65,8 +72,13 @@ export async function deliverReport(
           .eq("id", row.id)
           .eq("revision", row.revision),
       );
+      emailStatus = status;
     }
-    return { status: "DELIVERY_ATTEMPTED" };
+    return {
+      status: "DELIVERY_ATTEMPTED",
+      emailStatus,
+      emailError,
+    };
   } finally {
     checked(
       await db()
