@@ -263,7 +263,11 @@ function buildText(row: ReportRow, reportUrl: string, pdfUrl: string) {
     .join("\n");
 }
 
-export async function sendReport(row: ReportRow, email: string) {
+export async function sendReport(
+  row: ReportRow,
+  email: string,
+  idempotencyKey = `report-${row.id}-v${row.revision}`,
+) {
   if (!env.RESEND_API_KEY || !env.REPORT_FROM_EMAIL)
     throw new Error("EMAIL_NOT_CONFIGURED");
 
@@ -279,7 +283,7 @@ export async function sendReport(row: ReportRow, email: string) {
       html: buildHtml(row, reportUrl, pdfUrl),
       text: buildText(row, reportUrl, pdfUrl),
     },
-    { idempotencyKey: `report-${row.id}-v${row.revision}` },
+    { idempotencyKey },
   );
 
   if (error) throw new Error(classifyResendError(error));
