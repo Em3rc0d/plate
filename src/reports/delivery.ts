@@ -31,7 +31,7 @@ export async function deliverReport(
       // when a PDF is actually being generated. This also makes packaging
       // failures catchable instead of crashing the whole serverless process.
       const { generatePdf } = await import("./pdf-service");
-      await generatePdf(row);
+      await generatePdf(row, forceEmail || pdfOnly);
     } catch (error) {
       capture("pdf_failure", { report_id: row.id });
       checked(
