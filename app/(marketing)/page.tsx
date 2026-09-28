@@ -26,13 +26,13 @@ import {
 } from "@/src/config/providers";
 
 export const metadata: Metadata = {
-  title: "Consulta vehicular por placa en Perú",
+  title: "Reporte vehicular por placa en Perú",
   description:
     "Revisa información vehicular por placa antes de comprar un usado: identidad, registro, SOAT, CITV y papeletas según la cobertura habilitada, con fuente y fecha.",
   alternates: { canonical: publicSiteUrl },
   openGraph: {
     url: publicSiteUrl,
-    title: "Consulta vehicular por placa en Perú | PlacaClara",
+    title: "Reporte vehicular por placa en Perú | PlacaClara",
     description:
       "Revisa información vehicular con fuente, fecha y cobertura clara antes de comprar un usado.",
     images: [
@@ -108,7 +108,7 @@ export default function Home() {
 
   return (
     <main id="main" className="visual-master-page">
-      <PageEvent event="landing_view" />
+      <PageEvent event="landing_view" properties={{ path: "/" }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
