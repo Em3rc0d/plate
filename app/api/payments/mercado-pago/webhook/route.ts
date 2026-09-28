@@ -27,11 +27,11 @@ export async function POST(req: Request) {
       const order = required(
         await db()
           .from("orders")
-          .select("id,plate")
+          .select("id,plate,analytics_id")
           .eq("id", attempt.order_id)
           .single(),
       );
-      await track("payment_approved", order.id, {
+      await track("payment_approved", order.analytics_id || order.id, {
         provider: "mercadopago",
         source: "webhook",
       });
