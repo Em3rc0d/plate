@@ -35,6 +35,12 @@ export const metadata: Metadata = {
     title: "Consulta vehicular por placa en Perú | PlacaClara",
     description:
       "Revisa información vehicular con fuente, fecha y cobertura clara antes de comprar un usado.",
+    images: [
+      {
+        url: "/placaclara-hero-master.webp",
+        alt: "PlacaClara, reporte vehicular para compra de autos usados en Perú",
+      },
+    ],
   },
 };
 
@@ -81,6 +87,12 @@ export default function Home() {
       "@type": "Organization",
       name: productName,
       url: publicSiteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${publicSiteUrl}/placaclara-mark.svg`,
+        width: 512,
+        height: 512,
+      },
       legalName: env.BUSINESS_LEGAL_NAME || undefined,
       taxID: env.BUSINESS_RUC || undefined,
       areaServed: { "@type": "Country", name: "Perú" },

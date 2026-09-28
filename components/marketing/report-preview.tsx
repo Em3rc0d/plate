@@ -5,65 +5,75 @@ import {
 } from "@/src/config/providers";
 
 type DemoState = "VERIFIED" | "NOT_FOUND" | "UNAVAILABLE" | "CONFLICT";
+type DemoItem = {
+  state: DemoState;
+  label: string;
+  detail: string;
+  source: string;
+};
 
-const demoByCapability: Partial<
-  Record<Capability, { state: DemoState; label: string; detail: string }>
-> = {
+const demoByCapability: Partial<Record<Capability, DemoItem>> = {
   IDENTITY: {
     state: "VERIFIED",
     label: "Información disponible",
-    detail:
-      "RENAULT LOGAN · Año modelo 2015 · GRIS BEIGE. Datos ficticios para mostrar el formato.",
+    detail: "RENAULT LOGAN · Año modelo 2015 · GRIS BEIGE",
+    source: "Registro vehicular",
   },
   REGISTRY_CURRENT_OWNER: {
     state: "VERIFIED",
     label: "Información disponible",
     detail:
-      "Titular registrado: CARLOS V***** B***** · Documento enmascarado. Ejemplo ficticio.",
+      "Titular registrado: CARLOS V. B. · Identidad parcialmente oculta en esta demostración.",
+    source: "Registro vehicular",
   },
   REGISTRY_HISTORY: {
     state: "VERIFIED",
     label: "Información disponible",
     detail:
       "3 registros históricos devueltos. El número total de transferencias no se infiere automáticamente.",
+    source: "Registro vehicular",
   },
   RESTRICTIONS: {
-    state: "VERIFIED",
-    label: "Información disponible",
-    detail:
-      "1 registro registral requiere revisión documental. Ejemplo ficticio.",
+    state: "CONFLICT",
+    label: "Requiere revisión",
+    detail: "1 registro registral requiere revisión documental.",
+    source: "Registro vehicular",
   },
   SOAT: {
     state: "VERIFIED",
     label: "Vigente",
-    detail:
-      "Rimac Seguros · vigencia hasta 25/09/2027 · historial disponible. Ejemplo ficticio.",
+    detail: "SOAT vigente hasta 25/09/2027 · 3 certificados encontrados.",
+    source: "Consulta SOAT",
   },
   CITV: {
     state: "VERIFIED",
     label: "Vigente",
-    detail:
-      "Revisión técnica vigente hasta 06/07/2027. Ejemplo ficticio.",
+    detail: "Revisión técnica vigente hasta 06/07/2027.",
+    source: "Consulta CITV",
   },
   FINES_NATIONAL: {
     state: "NOT_FOUND",
     label: "Sin registros devueltos",
     detail:
-      "SUTRAN no devolvió registros dentro de la cobertura consultada. Ejemplo ficticio.",
+      "SUTRAN no devolvió registros dentro de la cobertura consultada.",
+    source: "Consulta SUTRAN",
   },
   FINES_LIMA: {
     state: "VERIFIED",
     label: "Información disponible",
-    detail:
-      "2 papeletas pendientes · S/ 350.00 publicados. Ejemplo ficticio.",
+    detail: "2 papeletas pendientes · S/ 350.00 publicados.",
+    source: "Consulta Lima",
   },
   FINES_CALLAO: {
     state: "UNAVAILABLE",
     label: "No disponible",
     detail:
       "La fuente no estuvo disponible en esta consulta de demostración.",
+    source: "Consulta Callao",
   },
 };
+
+const DEMO_DATE = "28 sep 2026";
 
 export function ReportPreview({ compact = false }: { compact?: boolean }) {
   const capabilities = enabledCapabilities();
@@ -73,12 +83,16 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
       demoByCapability[cap] ?? {
         state: "VERIFIED" as const,
         label: "Información disponible",
-        detail:
-          "Ejemplo ficticio de información devuelta por una fuente habilitada.",
+        detail: "Información ilustrativa devuelta por una fuente habilitada.",
+        source: "Cobertura habilitada",
       },
   );
+
   const withData = statuses.filter((item) => item.state === "VERIFIED").length;
   const review = statuses.filter((item) => item.state === "CONFLICT").length;
+  const notFound = statuses.filter(
+    (item) => item.state === "NOT_FOUND",
+  ).length;
   const unavailable = statuses.filter(
     (item) => item.state === "UNAVAILABLE",
   ).length;
@@ -114,14 +128,26 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
 
       {!compact && (
         <>
-          <p className="sample-date">
-            Consulta ilustrativa · datos ficticios
+          <p className="sample-demo-note">
+            Todos los datos, fuentes y fechas de esta muestra son ilustrativos.
           </p>
-          <p className="sample-footnote" style={{ marginBottom: 8 }}>
-            <strong>{withData}</strong> áreas con información ·{" "}
-            <strong>{review}</strong> para revisar ·{" "}
-            <strong>{unavailable}</strong> no disponible
-          </p>
+          <div
+            className="sample-summary"
+            aria-label="Resumen de la demostración"
+          >
+            <span>
+              <strong>{withData}</strong> con información
+            </span>
+            <span>
+              <strong>{review}</strong> observación
+            </span>
+            <span>
+              <strong>{notFound}</strong> sin registros
+            </span>
+            <span>
+              <strong>{unavailable}</strong> no disponible
+            </span>
+          </div>
         </>
       )}
 
@@ -132,7 +158,8 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
               state: "VERIFIED" as const,
               label: "Información disponible",
               detail:
-                "Ejemplo ficticio de información devuelta por una fuente habilitada.",
+                "Información ilustrativa devuelta por una fuente habilitada.",
+              source: "Cobertura habilitada",
             };
 
           return (
@@ -145,16 +172,9 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
               {!compact && (
                 <>
                   <p>{demo.detail}</p>
-                  <dl className="sample-provenance">
-                    <div>
-                      <dt>Fuente</dt>
-                      <dd>Fuente de demostración (ficticia)</dd>
-                    </div>
-                    <div>
-                      <dt>Consulta ilustrativa</dt>
-                      <dd>Fecha ficticia de demostración</dd>
-                    </div>
-                  </dl>
+                  <p className="sample-meta">
+                    Fuente ilustrativa · {demo.source} · {DEMO_DATE}
+                  </p>
                 </>
               )}
             </section>
@@ -172,9 +192,8 @@ export function ReportPreview({ compact = false }: { compact?: boolean }) {
       )}
 
       <p className="sample-footnote">
-        Vista ilustrativa. La placa, los importes, las fechas y todos los
-        resultados son ficticios. El reporte real depende exclusivamente de las
-        fuentes habilitadas y su respuesta para la placa consultada.
+        El reporte real muestra únicamente la respuesta de las fuentes
+        habilitadas para la placa consultada.
       </p>
     </article>
   );

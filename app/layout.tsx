@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./demo-polish.css";
 import { productName, publicSiteUrl } from "@/src/config/product";
 
 export const viewport: Viewport = {
@@ -16,6 +17,15 @@ export const metadata: Metadata = {
   description:
     "Consulta información vehicular por placa en Perú con fuente, fecha y cobertura clara. Revisa identidad, registro, SOAT, CITV y papeletas según las fuentes habilitadas.",
   applicationName: productName,
+  icons: {
+    icon: [
+      {
+        url: "/placaclara-mark.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    shortcut: ["/placaclara-mark.svg"],
+  },
   openGraph: {
     type: "website",
     locale: "es_PE",
