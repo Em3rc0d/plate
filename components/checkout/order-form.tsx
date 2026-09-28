@@ -60,10 +60,6 @@ export function OrderForm({
             throw new Error(
               "No se pudo iniciar el pedido. Revisa tus datos o intenta más tarde.",
             );
-          browserTrack("checkout_started", {
-            source: "checkout",
-            method,
-          });
           router.push(`/pago/${data.id}`);
         } catch (e) {
           setError(e instanceof Error ? e.message : "Error al crear pedido.");
