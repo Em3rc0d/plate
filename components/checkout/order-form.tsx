@@ -1,5 +1,5 @@
 "use client";
-import { browserTrack } from "@/src/analytics/browser";
+import { browserAnalyticsId, browserTrack } from "@/src/analytics/browser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ export function OrderForm({
               phone: form.get("phone"),
               method,
               accepted: form.get("accepted") === "on",
+              analyticsId: browserAnalyticsId() || undefined,
             }),
           });
           const data = await res.json();
@@ -59,6 +60,10 @@ export function OrderForm({
             throw new Error(
               "No se pudo iniciar el pedido. Revisa tus datos o intenta más tarde.",
             );
+          browserTrack("checkout_started", {
+            source: "checkout",
+            method,
+          });
           router.push(`/pago/${data.id}`);
         } catch (e) {
           setError(e instanceof Error ? e.message : "Error al crear pedido.");
