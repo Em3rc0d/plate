@@ -351,6 +351,38 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="content" aria-labelledby="guias-title">
+        <div className="wrap">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">ANTES DE COMPRAR</p>
+              <h2 id="guias-title">Explora las guías de PlacaClara</h2>
+            </div>
+            <p>
+              Entiende qué responde cada consulta y qué conviene revisar antes
+              de pagar por un vehículo usado.
+            </p>
+          </div>
+          <div className="grid3">
+            {[
+              ["Consulta vehicular por placa", "/consulta-vehicular-por-placa"],
+              ["Qué revisar antes de comprar", "/comprar-auto-usado"],
+              ["Historial vehicular", "/historial-vehicular"],
+              ["SOAT por placa", "/soat-por-placa"],
+              ["Revisión técnica por placa", "/revision-tecnica-por-placa"],
+              ["Papeletas por placa", "/papeletas-por-placa"],
+            ].map(([title, href]) => (
+              <Link className="card" href={href} key={href}>
+                <h3>{title}</h3>
+                <p>
+                  Guía práctica con alcance, límites y fuentes de referencia.
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="content faq" id="preguntas">
         <div className="wrap">
           <p className="eyebrow">PREGUNTAS FRECUENTES</p>

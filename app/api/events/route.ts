@@ -38,6 +38,18 @@ export async function POST(req: Request) {
               .enum(["landing", "preview", "checkout", "payment", "report"])
               .optional(),
             status: z.string().regex(/^[A-Z0-9_-]{1,40}$/).optional(),
+            path: z
+              .enum([
+                "/",
+                "/guias",
+                "/consulta-vehicular-por-placa",
+                "/historial-vehicular",
+                "/soat-por-placa",
+                "/revision-tecnica-por-placa",
+                "/papeletas-por-placa",
+                "/comprar-auto-usado",
+              ])
+              .optional(),
           })
           .strict()
           .default({}),

@@ -56,6 +56,7 @@ export function Footer() {
           </p>
         </div>
         <div className="flex">
+          <Link href="/guias">Guías</Link>
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/terminos">Términos</Link>
           <Link href="/legal/reembolsos">Reembolsos</Link>
