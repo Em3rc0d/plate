@@ -1,53 +1,28 @@
-# Lean Launch — Vehicle Intelligence PE
+# Lean Launch — documento histórico
 
-## Fixed-cost policy
+> **Estado: histórico.** Este archivo conserva las decisiones de la fase inicial de PlacaClara y no describe el runtime comercial actual. Para operación vigente usa [docs/README.md](docs/README.md), [docs/OPERATIONS.md](docs/OPERATIONS.md) y [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md).
 
-Launch with only:
+## Decisión original
 
-- Vercel Free
-- Supabase Free
-- Yape/Plin manual
-- Masitaprex as the only paid data provider
+La primera estrategia de lanzamiento buscaba minimizar costo fijo usando Vercel/Supabase y una cobertura registral mínima con Masitaprex, manteniendo integraciones adicionales apagadas hasta validación.
 
-Keep disabled until justified by real usage:
+`LAUNCH_PROFILE=REGISTRY_LEAN` y `PREVIEW_PROVIDER_MODE=NONE` nacieron en esta etapa para separar disponibilidad comercial de proveedores no certificados y evitar gasto antes del pago.
 
-- Resend
-- PostHog
-- Sentry
-- OpenAI
-- PlacApi
-- ConsultaDatos
-- Culqi/Izipay
+## Qué cambió después
 
-## Product profile
+Posteriormente se integraron y certificaron componentes que este documento original no contemplaba como estado operativo:
 
-`LAUNCH_PROFILE=REGISTRY_LEAN`
+- Mercado Pago Checkout API;
+- pago LIVE controlado;
+- PlacApi para fuentes dinámicas;
+- Libro de Reclamaciones;
+- reporte dossier web/PDF;
+- métricas financieras;
+- dominio propio;
+- SEO técnico y funnel first-party.
 
-Commercial checkout requires:
+Por tanto, las referencias históricas a “Yape/Plin manual”, “solo Masitaprex” o integraciones todavía inexistentes no deben usarse para configurar Production.
 
-- Supabase server access;
-- vehicle identity capability;
-- current registry-owner capability;
-- at least one manual payment method;
-- legal operator name + RUC;
-- Book of Claims URL.
+## Principio que sigue vigente
 
-SOAT, CITV and fines are optional in this launch profile and must not be marketed as enabled unless a configured provider declares those capabilities.
-
-Switch to `LAUNCH_PROFILE=FULL` only when registry + SOAT + CITV + fines are all backed by validated providers.
-
-## Free-preview cost control
-
-`PREVIEW_PROVIDER_MODE=NONE`
-
-Anonymous visitors only normalize/validate the plate and see currently enabled coverage. No paid provider call is made before payment. Paid provider calls start only after manual payment approval.
-
-## Current production Supabase
-
-- Project: `vehicle-intelligence-pe`
-- Ref: `ftupozoqqjhqllhjocyn`
-- URL: `https://ftupozoqqjhqllhjocyn.supabase.co`
-- Security Advisor after migrations: 0 findings
-- Buckets `payment-proofs` and `report-pdfs`: private
-
-Do not commit secret keys. `.env.production.template` intentionally contains placeholders for all secrets.
+Mantener gates explícitos y no gastar créditos antes de que el flujo comercial lo justifique. La fuente de verdad de capacidades es el código + configuración real del entorno.

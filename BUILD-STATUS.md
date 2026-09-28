@@ -1,52 +1,71 @@
-# FINISHING BATCH STATUS
+# PlacaClara — estado técnico
 
-PASS en funciones significa implementación completada y compatible con lint, tipos y build. No significa validación autenticada contra servicios externos.
+Actualizado: 2026-09-28.
 
-## Core fixes
-- Resend decoupled: PASS. Pedido exige DB/proveedor/pago, no Resend; email NOT_CONFIGURED.
-- Reprocess/recovery: PASS. Estados pagados fallidos/vencidos, tokens por intento e idempotencia persistida; reporte existente se recupera sin consultar salvo forceRefresh.
-- Redelivery: PASS. PDF/email independientes de proveedores y protegidos por lease/revisión.
-- Private/share report split: PASS. Tokens independientes; DTO compartible por allowlist sin identidad ni datos del pedido.
-- Owner deduplication: PASS. Señales conservadoras, revisión de documentos inconsistentes y conteo omitido si ambiguo.
+Este archivo es una fotografía técnica. La fuente de verdad de runtime sigue siendo código + migraciones + configuración del entorno.
 
-## Launch operations
-- Readiness dashboard: PASS. Configuración, DB/buckets, capacidades, pago, entrega y negocio sin secretos.
-- Provider probe: PASS. Sonda administrativa de proveedores reales, métricas y comparación normalizada sin PII.
-- Legal/business config: PASS. Identidad no inventada; privacidad/términos/reembolsos y Libro configurable.
-- Checkout policy consent: PASS. Checkbox requerido y versiones/timestamp persistidos.
-- Retention controls: PASS. Plazos vacíos desactivados; ejecución manual, preview y lotes de 100; no borra contabilidad.
+## Código en main
 
-## Coverage architecture
-- Capability registry: PASS.
-- Future sections schema: PASS. Robo/captura/siniestros/GNV/valorización en NOT_CONFIGURED sin adaptadores falsos.
-- Marketing coverage gating: PASS. CoverageList y cards dependen de capacidades habilitadas.
+`main` contiene actualmente:
 
-## Build
-- Migrations: APPLIED en Supabase `vehicle-intelligence-pe`: initial_vehicle_platform, finishing_launch_controls y add_fk_indexes. El tercer archivo cubre los FK indexados señalados por Performance Advisor.
-- Lockfile: PASS. `pnpm-lock.yaml` fue regenerado desde el manifiesto actual con pnpm 11.25.0 y quedó versionado en `main`.
-- Frozen install: PASS con `pnpm install --frozen-lockfile` en runner Linux limpio.
-- Lint: PASS sobre el código actual.
-- Typecheck: PASS sobre el código actual.
-- Build: PASS sobre el código actual con Next.js 16.3.6/webpack.
-- Verificación one-shot: PASS el 2026-09-27 (GitHub Actions run 36293403269). El workflow temporal se elimina después de la verificación; no se mantiene CI persistente.
-- Tests: no creados ni ejecutados por alcance.
-- Deployment: no desplegado.
-- Supabase Security Advisor: PASS — sin lints de seguridad tras aplicar migraciones.
-- Supabase Performance Advisor: sin foreign keys sin índice; solo avisos INFO de índices todavía no usados en una base vacía.
+- checkout Mercado Pago API;
+- aislamiento TEST/LIVE e idempotencia;
+- webhook firmado + reconciliación;
+- proveedor registral Masitaprex;
+- PlacApi para SOAT/CITV/papeletas;
+- refresh selectivo sin repetir Masitaprex;
+- reporte web/PDF tipo dossier;
+- redelivery sin proveedores;
+- Libro de Reclamaciones;
+- métricas financieras;
+- SEO técnico;
+- analítica de conversión first-party;
+- dashboard `/admin/analytics`.
 
-## Remaining human launch blockers
-Administrador; credenciales y saldo de proveedores; configuración de Yape/Plin; datos legales, contactos y Libro de Reclamaciones; despliegue y origen correcto. Completar sonda AKE473 y compra interna real. Resend, OpenAI, PostHog y Sentry son opcionales; habilitarlos requiere sus credenciales si se desean.
+## Validaciones confirmadas
 
-## Files added/modified
-El inventario completo está en docs/FINISHING-CHANGES.md. Incluye rutas de recuperación/redelivery/share/retención/probe, readiness, legales, tipos canónicos, deduplicación, capability registry, migración 2, documentación y golden manual.
+- Mercado Pago TEST con tarjeta: aprobado sin marcar pedido como pagado ni ejecutar proveedores.
+- Mercado Pago LIVE con tarjeta: un cargo controlado aprobado y persistido.
+- Masitaprex LIVE: una ejecución real exitosa con costo persistido.
+- Refresh selectivo: confirmó cero nuevas llamadas Masitaprex.
+- PDF: generación operativa con React PDF.
+- Email: entrega técnica probada con remitente de prueba; dominio remitente propio sigue siendo una tarea operacional independiente.
+- Custom domain: `placaclara.com` y `www.placaclara.com` asociados; canonical decidido en `www`.
+- SEO/funnel: build Preview del commit `71e6c530276acd4b6323d90e145cd344246aa091` en estado READY.
 
-## Critical caveats
-Supabase ya está creado y migrado, pero faltan credenciales de proveedores y configuración de aplicación: sonda real no ejecutada, carga a Storage ni correo real verificados. ConsultaDatos sigue pendiente de contrato completo corroborado. No hay cola durable: recuperación manual con fencing; no puede deshacer llamadas/cobros ya en vuelo. La página readiness evalúa configuración y lectura de infraestructura, no certifica operación comercial ni conformidad jurídica. REPORT_RETENTION_DAYS elimina PDF bajo acción explícita, no report_json. Los textos legales requieren identidad y política efectiva del operador. La referencia golden es observación previa del usuario, no estado actual garantizado.
+## Base de datos
 
-## Lean launch profile — 2026-09-26
+Migraciones aplicadas en producción:
 
-The initial commercial profile is now `REGISTRY_LEAN` to keep fixed software cost at zero and use Masitaprex as the only paid provider. SOAT, CITV and fines remain capability-gated and are not commercial blockers in this profile. They become mandatory again when `LAUNCH_PROFILE=FULL`.
+1. `initial_vehicle_platform`
+2. `finishing_launch_controls`
+3. `add_fk_indexes`
+4. `book_of_claims`
+5. `mercado_pago_checkout`
+6. `harden_payment_test_isolation`
+7. `payment_financials`
+8. `order_analytics_id`
+9. `analytics_events`
 
-Anonymous preview defaults to `PREVIEW_PROVIDER_MODE=NONE`, so no provider credit is spent before payment approval. The public copy names the initial product `Reporte Registral Vehicular` and only renders configured capabilities.
+`supabase/schema.sql` es snapshot inicial, no esquema final.
 
-Optional integrations remain disabled when their keys are blank: Resend, PostHog, Sentry, OpenAI, ConsultaDatos and PlacApi.
+## Estado de despliegue
+
+La versión comercial previa está activa en Production.
+
+El bloque SEO + funnel está mergeado en `main`, pero su promoción a Production está temporalmente bloqueada por Vercel. No afirmar que `robots.txt`, `sitemap.xml` o `/admin/analytics` están activos públicamente hasta que el commit correspondiente quede desplegado en Production.
+
+## Pendientes operativos relevantes
+
+- promover el `main` actual a Production cuando Vercel lo permita;
+- validar públicamente canonical, robots, sitemap y noindex después de promover;
+- crear/verificar propiedad de Google Search Console y enviar sitemap;
+- confirmar webhook LIVE sobre el dominio definitivo;
+- verificar dominio remitente de Resend y usar correo corporativo;
+- conciliar fee/neto real del pago LIVE si aún figura pendiente;
+- comprar créditos PlacApi antes de nuevas consultas CITV/papeletas;
+- mantener Yape deshabilitado hasta certificación.
+
+## Regla de seguridad
+
+No se necesita un segundo pago ni una nueva consulta pagada para validar SEO, dominio, PDF existente, reporte web o estructura del repositorio.
