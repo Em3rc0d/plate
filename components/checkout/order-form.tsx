@@ -101,21 +101,17 @@ export function OrderForm({
         <TabsList className="tab-list" aria-label="Medio de pago">
           {mercadoPago ? (
             <>
-              <TabsTrigger value="MP_YAPE" disabled={!enabled.MP_YAPE}>
-                Yape
-              </TabsTrigger>
-              <TabsTrigger value="MP_CARD" disabled={!enabled.MP_CARD}>
-                Tarjeta
-              </TabsTrigger>
+              {enabled.MP_YAPE && (
+                <TabsTrigger value="MP_YAPE">Yape</TabsTrigger>
+              )}
+              {enabled.MP_CARD && (
+                <TabsTrigger value="MP_CARD">Tarjeta</TabsTrigger>
+              )}
             </>
           ) : (
             <>
-              <TabsTrigger value="YAPE" disabled={!enabled.YAPE}>
-                Yape
-              </TabsTrigger>
-              <TabsTrigger value="PLIN" disabled={!enabled.PLIN}>
-                Plin
-              </TabsTrigger>
+              {enabled.YAPE && <TabsTrigger value="YAPE">Yape</TabsTrigger>}
+              {enabled.PLIN && <TabsTrigger value="PLIN">Plin</TabsTrigger>}
             </>
           )}
         </TabsList>
