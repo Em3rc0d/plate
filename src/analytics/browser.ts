@@ -20,7 +20,6 @@ export function browserTrack(
   event: string,
   properties: Record<string, string> = {},
 ) {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
   try {
     const id = browserAnalyticsId();
     if (!id) return;
@@ -38,7 +37,6 @@ export function browserTrackOnce(
   scope = "session",
   properties: Record<string, string> = {},
 ) {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
   try {
     const key = `pc_event:${event}:${scope}`;
     if (sessionStorage.getItem(key)) return;
