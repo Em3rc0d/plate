@@ -1,9 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
   CarFront,
-  Database,
   FileText,
   History,
   LockKeyhole,
@@ -17,12 +17,26 @@ import { PageEvent } from "@/components/marketing/page-event";
 import { PlateForm } from "@/components/marketing/plate-form";
 import { Button } from "@/components/ui/button";
 import { env, mercadoPagoConfigured } from "@/src/config/env";
+import { productName, publicSiteUrl } from "@/src/config/product";
 import { offeringName } from "@/src/config/commercial";
 import {
   capabilityLabels,
   enabledCapabilities,
   type Capability,
 } from "@/src/config/providers";
+
+export const metadata: Metadata = {
+  title: "Consulta vehicular por placa en Perú",
+  description:
+    "Revisa información vehicular por placa antes de comprar un usado: identidad, registro, SOAT, CITV y papeletas según la cobertura habilitada, con fuente y fecha.",
+  alternates: { canonical: publicSiteUrl },
+  openGraph: {
+    url: publicSiteUrl,
+    title: "Consulta vehicular por placa en Perú | PlacaClara",
+    description:
+      "Revisa información vehicular con fuente, fecha y cobertura clara antes de comprar un usado.",
+  },
+};
 
 const states = [
   ["VERIFIED", "Información disponible", "La fuente devolvió datos para esta sección."],
@@ -61,11 +75,34 @@ function FeatureIcon({ cap }: { cap: Capability }) {
 
 export default function Home() {
   const capabilities = enabledCapabilities();
-  const heroRows = capabilities.slice(0, 5);
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: productName,
+      url: publicSiteUrl,
+      legalName: env.BUSINESS_LEGAL_NAME || undefined,
+      taxID: env.BUSINESS_RUC || undefined,
+      areaServed: { "@type": "Country", name: "Perú" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: productName,
+      url: publicSiteUrl,
+      inLanguage: "es-PE",
+    },
+  ];
 
   return (
     <main id="main" className="visual-master-page">
       <PageEvent event="landing_view" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
 
       <section className="master-hero">
         <div className="wrap master-hero-grid">
