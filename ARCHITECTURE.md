@@ -1,4 +1,4 @@
-# Vehicle Intelligence PE — arquitectura
+# PlacaClara — arquitectura
 
 ## Promesa y límites
 
@@ -31,7 +31,7 @@ flowchart TD
 
 `src/orders`: cookie opaca HttpOnly de 256 bits por pedido, hash persistido y comparación constante. El correo es opcional para entregar, nunca requisito de cobro. terms_version, privacy_version y accepted_at se registran al aceptar las versiones mostradas; una pantalla con versiones antiguas se rechaza para evitar consentimiento equivocado. UUID del pedido por sí solo no autoriza consulta ni upload. Pago manual detrás de PaymentProvider.
 
-`src/vehicle/service`: generateVehicleReport({plate,orderId,forceRefresh}). Consulta independiente de seguros, inspecciones, papeletas y cadena registral con Promise.allSettled. Una falla no cancela las demás.
+`src/vehicle/service`: `generateVehicleReport({plate,orderId,forceRefresh})` coordina el reporte. Una generación inicial puede consultar cadena registral y fuentes dinámicas en paralelo. En un refresh explícito de un reporte existente, la evidencia registral ya persistida se conserva y solo se vuelven a consultar SOAT, CITV y papeletas. Una falla de una fuente no cancela las demás.
 
 `src/reports`: serialización canónica permitida, web y PDF generado desde la misma estructura. Link privado de 256 bits y share_code independiente creado bajo demanda; verificación reducida. Descargas protegidas por el código opaco. PDF sin datos del pago.
 
@@ -49,7 +49,7 @@ Estados: VERIFIED, NOT_FOUND, UNAVAILABLE, NOT_CONFIGURED, STALE, CONFLICT. VERI
 
 En discrepancias se conserva el primer valor según prioridad y todas las evidencias quedan marcadas CONFLICT; no hay resolución silenciosa. Certificado current: fechas vigentes en zona Lima y estado VIGENTE; historial ordenado por vencimiento, no por orden del proveedor. Reportes son snapshots, no promesas de vigencia perpetua.
 
-Cache: reutilización conservadora del reporte canónico solo si todas las evidencias VERIFIED/NOT_FOUND siguen frescas; cualquier evidencia caducada o fallida fuerza nueva consulta. No se implementa mezcla de cachés de diferentes snapshots. Preview tiene caché separada de 1 hora y comparte el registro contable de llamadas.
+Cache: la generación ordinaria reutiliza el reporte canónico solo si todas las evidencias VERIFIED/NOT_FOUND siguen frescas. El refresh administrativo de un reporte existente es selectivo: conserva el snapshot registral y reemplaza únicamente `insurance`, `inspection` y `fines` con una consulta nueva. Cada llamada nueva conserva su propio `query_id`, trazabilidad y costo. Preview mantiene su control separado y comparte el registro contable de llamadas.
 
 ## Seguridad
 
@@ -61,7 +61,7 @@ No direcciones, DNI completo, payload crudo, comprobantes ni correo en analític
 
 ## Costos y salud
 
-Costo por intento según env; PlacApi usa cost devuelto si existe. Los intentos fallidos se estiman conservadoramente; no son conciliación de factura del proveedor. provider_health_daily es una vista agregada security_invoker. Métricas administrativas: ingreso bruto de pagos aprobados, costo de todas las llamadas, costo medio por reporte y reportes del día Lima. No incluye impuestos, devoluciones, hosting, correo ni margen neto.
+Costo por intento según env; PlacApi usa el costo devuelto si existe y, si no, el costo unitario configurado. Los intentos fallidos se estiman conservadoramente; no equivalen a conciliación de factura del proveedor. `provider_health_daily` es una vista agregada `security_invoker`. El tablero distingue ingreso bruto, deducciones reales conocidas de Mercado Pago, neto tras pagos, costo de datos y contribución después de pagos + datos. Hosting, impuestos, devoluciones y otros costos operativos siguen fuera de esa contribución.
 
 ## Extensión
 
