@@ -70,9 +70,13 @@ export function OrderActions({
       }
       requestKey.current = null;
       setMessage(
-        data.status === "FAILED"
-          ? "Requiere resolución manual; no otro pago."
-          : "Operación finalizada.",
+        kind === "redeliver" && data.emailStatus === "FAILED"
+          ? `Correo falló: ${data.emailError || "EMAIL_FAILED"}.`
+          : kind === "redeliver" && data.emailStatus === "SENT"
+            ? "Correo enviado correctamente."
+            : data.status === "FAILED"
+              ? "Requiere resolución manual; no otro pago."
+              : "Operación finalizada.",
       );
       router.refresh();
     } catch {
