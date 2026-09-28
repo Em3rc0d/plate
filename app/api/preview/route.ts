@@ -9,7 +9,6 @@ import { db, checked, required } from "@/src/db/client";
 import { rateLimit } from "@/src/utils/rate-limit";
 import { vehicle } from "@/src/providers/identity/placapi-vehicle";
 import { buildEvidence } from "@/src/evidence/engine";
-import { track } from "@/src/analytics";
 export const runtime = "nodejs";
 export async function POST(req: Request) {
   return handle(async () => {
@@ -110,10 +109,6 @@ export async function POST(req: Request) {
             expires_at: new Date(Date.now() + 3600000).toISOString(),
           }),
       );
-    await track(
-      data.status === "VERIFIED" ? "preview_success" : "preview_failed",
-      query.id,
-    );
     return NextResponse.json({ ...base, ...data });
   });
 }
