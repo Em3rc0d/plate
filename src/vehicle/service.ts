@@ -93,7 +93,8 @@ export async function generateVehicleReport({
   );
   if (!attempt) return { status: "UNCHANGED", reportId: existing?.id };
   let queryId: string | undefined;
-  await track("report_started", orderId);
+  const analyticsId = order.analytics_id || orderId;
+  await track("report_started", analyticsId, { source: "payment" });
   try {
     const query = required(
       await database
@@ -254,7 +255,10 @@ export async function generateVehicleReport({
       await database.from("reports").select("*").eq("id", reportId).single(),
     ) as ReportRow;
     await deliverReport(row, order.email);
-    await track(partial ? "report_partial" : "report_ready", orderId);
+    await track(partial ? "report_partial" : "report_ready", analyticsId, {
+      source: "report",
+      status,
+    });
     return { status, reportId };
   } catch (e) {
     capture("report_failure", { order_id: orderId });
