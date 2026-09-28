@@ -1,5 +1,7 @@
 # FINISHING BATCH STATUS
 
+> **Documento histórico.** Conservado como evidencia del estado/decisiones de ese momento. Para operación vigente usa [docs/README.md](docs/README.md) y [docs/OPERATIONS.md](docs/OPERATIONS.md).
+
 PASS en funciones significa implementación completada y compatible con lint, tipos y build. No significa validación autenticada contra servicios externos.
 
 ## Core fixes
