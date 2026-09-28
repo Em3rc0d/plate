@@ -24,9 +24,10 @@ export async function GET(
         .eq("id", row.order_id)
         .single(),
     );
-    await track("pdf_downloaded", order.analytics_id || row.order_id, {
-      source: "report",
-    });
+    if (order.analytics_id)
+      await track("pdf_downloaded", order.analytics_id, {
+        source: "report",
+      });
     return new Response(file, {
       headers: {
         "Content-Type": "application/pdf",
