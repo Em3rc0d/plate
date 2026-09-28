@@ -152,6 +152,10 @@ export function MercadoPagoCheckout({
             testMode: boolean;
             providerStatus: string | null;
           };
+          report?: {
+            status: string;
+            reportId?: string;
+          };
           error?: string;
         };
         if (!response.ok && response.status !== 202)
@@ -168,7 +172,9 @@ export function MercadoPagoCheckout({
           setMessage(
             payment.testMode
               ? "Pago TEST aprobado. No se ejecutó ninguna consulta pagada a Masitaprex."
-              : "Pago aprobado. Estamos generando tu reporte.",
+              : data.report?.status === "FULFILLMENT_DEFERRED"
+                ? "Pago aprobado. Tu pedido quedó registrado y el reporte se procesará cuando se habilite la generación."
+                : "Pago aprobado. Estamos generando tu reporte.",
           );
           if (!payment.testMode) router.refresh();
           return;
