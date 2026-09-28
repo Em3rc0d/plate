@@ -46,7 +46,7 @@ export function OrderActions({
         body: JSON.stringify(
           kind === "reprocess"
             ? { forceRefresh, requestId: requestKey.current }
-            : { pdfOnly },
+            : { pdfOnly, forceEmail: kind === "redeliver" && !pdfOnly },
         ),
       });
       const data = await res.json();
@@ -119,7 +119,17 @@ export function OrderActions({
       )}
       {reportId && (
         <>
-          <Button disabled={busy} onClick={() => action("redeliver")}>
+          <Button
+            disabled={busy}
+            onClick={() => {
+              if (
+                confirm(
+                  "Esto regenerará el PDF y volverá a enviar el correo al cliente. No consulta proveedores ni consume Masitaprex/PlacApi. ¿Continuar?",
+                )
+              )
+                action("redeliver");
+            }}
+          >
             Reenviar entrega
           </Button>
           <Button
