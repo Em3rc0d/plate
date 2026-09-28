@@ -5,6 +5,7 @@ import { customerOrder } from "@/src/orders/service";
 import { rateLimit } from "@/src/utils/rate-limit";
 import { createMercadoPagoPayment } from "@/src/payments/mercado-pago";
 import { track } from "@/src/analytics";
+import { env } from "@/src/config/env";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -58,11 +59,19 @@ export async function POST(
         provider: "mercadopago",
         method: input.data.instrument.paymentMethodId,
       });
-      const { generateVehicleReport } = await import("@/src/vehicle/service");
-      report = await generateVehicleReport({
-        plate: order.plate,
-        orderId: order.id,
-      });
+
+      if (env.VEHICLE_PROVIDER_EXECUTION_ENABLED) {
+        const { generateVehicleReport } = await import("@/src/vehicle/service");
+        report = await generateVehicleReport({
+          plate: order.plate,
+          orderId: order.id,
+        });
+      } else {
+        // A valid LIVE payment must remain successful even while provider
+        // execution is intentionally disabled during launch certification.
+        // The PAID order can be resumed later through the admin reprocess flow.
+        report = { status: "FULFILLMENT_DEFERRED" };
+      }
     }
 
     return NextResponse.json(
