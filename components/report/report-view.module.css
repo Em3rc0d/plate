@@ -87,6 +87,40 @@
   font-size: 13px;
   line-height: 1.4;
 }
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+.overviewCard {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.overviewCard > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.overviewCard strong {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.25;
+}
+.overviewCard p {
+  margin: 6px 0 0 !important;
+  color: var(--muted);
+  font-size: 13px !important;
+}
+
 .summaryNote { margin: 0 !important; }
 .callout {
   margin-top: 20px;
@@ -232,6 +266,7 @@
   .sectionTitle { gap: 10px; }
   .sectionTitle > p { max-width: none; }
   .metrics,
+  .overviewGrid,
   .coverageGrid { grid-template-columns: 1fr; }
   .metrics > div { padding: 16px 0; }
   .metrics > div + div {
