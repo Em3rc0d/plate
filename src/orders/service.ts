@@ -27,6 +27,7 @@ export async function createOrder(input: {
   email: string;
   phone: string;
   method: "MP_YAPE" | "MP_CARD" | "YAPE" | "PLIN";
+  analyticsId?: string;
 }) {
   if (!commercialReadiness().ready)
     throw new Error("SERVICE_NOT_CONFIGURED");
@@ -57,6 +58,7 @@ export async function createOrder(input: {
         terms_version: env.TERMS_VERSION,
         privacy_version: env.PRIVACY_VERSION,
         accepted_at: new Date().toISOString(),
+        analytics_id: input.analyticsId || null,
       })
       .select("id")
       .single(),
