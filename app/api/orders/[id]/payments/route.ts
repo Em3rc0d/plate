@@ -55,11 +55,12 @@ export async function POST(
 
     let report: { status: string; reportId?: string } | undefined;
     if (payment.shouldFulfill) {
-      await track("payment_approved", order.analytics_id || order.id, {
-        provider: "mercadopago",
-        method: input.data.instrument.paymentMethodId,
-        source: "payment",
-      });
+      if (order.analytics_id)
+        await track("payment_approved", order.analytics_id, {
+          provider: "mercadopago",
+          method: input.data.instrument.paymentMethodId,
+          source: "payment",
+        });
 
       if (env.VEHICLE_PROVIDER_EXECUTION_ENABLED) {
         const { generateVehicleReport } = await import("@/src/vehicle/service");
