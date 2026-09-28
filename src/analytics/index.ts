@@ -10,6 +10,7 @@ const allowed = new Set([
   "payment_method_selected",
   "payment_proof_uploaded",
   "payment_submitted",
+  "payment_approved",
   "admin_payment_approved",
   "report_started",
   "provider_failed",
