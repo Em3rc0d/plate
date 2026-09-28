@@ -31,10 +31,11 @@ export async function POST(req: Request) {
           .eq("id", attempt.order_id)
           .single(),
       );
-      await track("payment_approved", order.analytics_id || order.id, {
-        provider: "mercadopago",
-        source: "webhook",
-      });
+      if (order.analytics_id)
+        await track("payment_approved", order.analytics_id, {
+          provider: "mercadopago",
+          source: "webhook",
+        });
       const { generateVehicleReport } = await import("@/src/vehicle/service");
       await generateVehicleReport({ plate: order.plate, orderId: order.id });
     }
