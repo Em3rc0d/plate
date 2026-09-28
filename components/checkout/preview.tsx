@@ -30,6 +30,7 @@ export function Preview({
     setBusy(true);
     setError("");
     setResult(null);
+    browserTrack("plate_submitted", { source: "preview" });
     try {
       const response = await fetch("/api/preview", {
         method: "POST",
