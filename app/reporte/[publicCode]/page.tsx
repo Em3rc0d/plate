@@ -21,9 +21,10 @@ export default async function Page({
       .eq("id", row.order_id)
       .maybeSingle(),
   );
-  await track("report_viewed", order?.analytics_id || row.order_id, {
-    source: "report",
-    status: row.status,
-  });
+  if (order?.analytics_id)
+    await track("report_viewed", order.analytics_id, {
+      source: "report",
+      status: row.status,
+    });
   return <ReportView row={row} />;
 }
