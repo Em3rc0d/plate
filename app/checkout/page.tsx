@@ -58,9 +58,16 @@ export default async function Page({
               termsVersion={env.TERMS_VERSION}
               privacyVersion={env.PRIVACY_VERSION}
               enabled={{
-                MP_YAPE: ready && mercadoPagoConfigured,
+                MP_YAPE:
+                  ready &&
+                  mercadoPagoConfigured &&
+                  env.YAPE_CHECKOUT_ENABLED,
                 MP_CARD: ready && mercadoPagoConfigured,
-                YAPE: ready && !!env.YAPE_PHONE && !!env.YAPE_DISPLAY_NAME,
+                YAPE:
+                  ready &&
+                  env.YAPE_CHECKOUT_ENABLED &&
+                  !!env.YAPE_PHONE &&
+                  !!env.YAPE_DISPLAY_NAME,
                 PLIN: ready && !!env.PLIN_PHONE && !!env.PLIN_DISPLAY_NAME,
               }}
             />
