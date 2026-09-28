@@ -30,10 +30,11 @@ export async function POST(req: Request) {
       throw new Error("INVALID_INPUT");
     }
     const order = await createOrder({ ...input.data, plate });
-    await track("checkout_started", input.data.analyticsId || order.id, {
-      source: "checkout",
-      method: input.data.method,
-    });
+    if (input.data.analyticsId)
+      await track("checkout_started", input.data.analyticsId, {
+        source: "checkout",
+        method: input.data.method,
+      });
     return NextResponse.json(order, { status: 201 });
   });
 }
