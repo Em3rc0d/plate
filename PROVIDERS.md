@@ -1,6 +1,6 @@
 # Proveedores y contratos
 
-Los endpoints se implementan exclusivamente servidor a servidor. No se ejecutaron consultas autenticadas en esta entrega. Las claves no estaban disponibles. Los ejemplos públicos se usan únicamente para comprender contratos, nunca como respuesta de producción.
+Los endpoints se implementan exclusivamente servidor a servidor. Este documento describe contratos y comportamiento del código; la disponibilidad real depende de las credenciales y saldo del entorno. Los ejemplos públicos se usan únicamente para comprender contratos, nunca como respuesta de producción.
 
 | Proveedor     | Propósito                  | Endpoint                                                     | Autenticación                  |
 | ------------- | -------------------------- | ------------------------------------------------------------ | ------------------------------ |
@@ -19,7 +19,7 @@ Documentación observada: https://masitaprex.com/API-Docs . Respuesta success/da
 
 LISTPROP: propietario/nombres, documentos, fechaProp, tipoDocumento. LISTPROPHIST: nombres/propietario, documentos. Se excluye dirección; documentos enmascarados. Todos los titulares actuales se preservan. LISTGRAVLEV vacío produce NOT_FOUND solo en restricciones. Un registro de gravamen desconocido no se representa como lista vacía válida.
 
-Costo configurable MASITAPREX_COST_PER_QUERY_PEN (default 0.036 proviene del brief, no de una compra verificada).
+Costo configurable mediante `MASITAPREX_COST_PER_QUERY_PEN`. El costo debe mantenerse alineado con el plan/saldo real y con lo observado en `provider_calls`; no asumir que un valor histórico del repositorio sigue vigente.
 
 ## ConsultaDatos
 
@@ -42,11 +42,11 @@ SOAT/CITV: certificados[], vigenciaInicio, vigenciaFin, estado, numeroPoliza/num
 
 Multas: total,pendientes,montoPendiente,papeletas[],cobertura. Campos numero,fecha,codigo,descripcion,monto,estado,entidad,origen. Monto null se conserva como desconocido. SUTRAN no publica importes; la suma no es necesariamente deuda total. Cobertura nacional/lima/callao: ok/sin_datos/error. No incluye pagadas ni todas las municipalidades. Cobertura incompleta fuerza reporte parcial.
 
-Costo: créditos devueltos * PLACAPI_COST_PER_CREDIT_PEN (default 0.10 del brief). Sin cost se estima 1 crédito por intento. No hay cargo real sin API key.
+Costo: créditos devueltos × `PLACAPI_COST_PER_CREDIT_PEN`. Si la respuesta no trae costo se estima 1 crédito por intento. El valor contable debe actualizarse cuando cambie el tramo comprado; el template actual usa el costo unitario del tramo de 349 COP como referencia operativa.
 
 ## Enrutamiento
 
-Registro: Masitaprex → ConsultaDatos. Identidad: payload registral → PlacApi vehicle. Seguros, CITV y papeletas en paralelo con la cadena registral. Cualquier estructura desconocida se registra como información no disponible en la evidencia. Los datos normalizados se guardan; payloads originales se descartan.
+Generación inicial: registro Masitaprex → ConsultaDatos como fallback; identidad puede completarse con PlacApi vehicle; SOAT, CITV y papeletas se consultan en paralelo. Refresh de un reporte existente: reutiliza la evidencia registral ya persistida y consulta únicamente SOAT, CITV y papeletas. Cualquier estructura desconocida se registra como información no disponible. Los datos normalizados se guardan; payloads originales se descartan.
 
 ## Registro de capacidades y sonda V0.2
 
@@ -54,6 +54,6 @@ src/config/providers.ts declara capacidades por adaptador; cada módulo exporta 
 
 /admin/providers/probe lanza todos los adaptadores con Promise.allSettled, no solo el fallback necesario. Registra costos por intento y muestra HTTP, latencia acumulada, timestamp, capacidades interpretadas, errores y una matriz limitada sin identidad del propietario. La matriz marca diferencias como revisión; no fuerza al proveedor a coincidir con AKE473. Una respuesta HTTP 200 puede tener campos UNAVAILABLE, visibles por separado.
 
-La sonda consume créditos cuando se configuran claves. No fue ejecutada contra proveedores reales en este batch porque no se aportaron credenciales. El formato y alias documentados se conservan; ninguna llamada se suplanta con el documento golden.
+La sonda consume créditos cuando existen claves configuradas. Debe usarse solo para diagnóstico manual controlado; no como health check periódico. El formato y alias documentados se conservan y ninguna llamada se suplanta con el documento golden.
 
 Preview: BASIC por defecto; NONE sin consulta; FULL activa la cadena registral de forma explícita. La caché siempre guarda únicamente plate/brand/model/status, no propietarios.
