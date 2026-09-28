@@ -3,7 +3,7 @@ const config: NextConfig = {
   outputFileTracingIncludes: {
     "/api/admin/providers/golden": ["./docs/GOLDEN-AKE473.md"],
     "/*": [
-      "./node_modules/.pnpm/pdfkit@0.20.1/node_modules/pdfkit/js/standard-fonts/*.cjs",
+      "./node_modules/.pnpm/pdfkit@0.20.1/node_modules/pdfkit/**/*",
     ],
   },
   serverExternalPackages: ["@react-pdf/renderer"],
