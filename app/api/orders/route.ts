@@ -18,6 +18,7 @@ export async function POST(req: Request) {
         accepted: z.literal(true),
         termsVersion: z.literal(env.TERMS_VERSION),
         privacyVersion: z.literal(env.PRIVACY_VERSION),
+        analyticsId: z.string().uuid().optional(),
       })
       .safeParse(await req.json());
     if (!input.success) throw new Error("INVALID_INPUT");
@@ -29,7 +30,10 @@ export async function POST(req: Request) {
       throw new Error("INVALID_INPUT");
     }
     const order = await createOrder({ ...input.data, plate });
-    await track("checkout_started", order.id);
+    await track("checkout_started", input.data.analyticsId || order.id, {
+      source: "checkout",
+      method: input.data.method,
+    });
     return NextResponse.json(order, { status: 201 });
   });
 }
