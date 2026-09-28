@@ -1,0 +1,115 @@
+.kicker {
+  margin: 0 0 8px !important;
+  color: var(--accent) !important;
+  font-size: 12px !important;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.summaryCard {
+  border-top: 4px solid var(--accent) !important;
+  padding: 30px !important;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 24px 0;
+  border-block: 1px solid var(--border);
+}
+.metrics > div { padding: 20px 18px 20px 0; }
+.metrics > div + div {
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+}
+.metrics strong {
+  display: block;
+  color: var(--text);
+  font-size: 30px;
+  line-height: 1;
+}
+.metrics span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.sectionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.sectionCard {
+  margin: 0 !important;
+  grid-column: 1 / -1;
+}
+.unavailable {
+  grid-column: auto;
+  padding: 20px !important;
+  background: rgba(255,255,255,.66) !important;
+}
+.unavailable :global(.facts),
+.unavailable :global(.section-limit) {
+  display: none;
+}
+.unavailable h2 {
+  font-size: 18px !important;
+}
+.trace {
+  margin-top: 18px;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+}
+.trace summary {
+  padding: 13px 0 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+.trace :global(.evidence) {
+  margin-top: 8px;
+}
+.traceRow {
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(0, 1.2fr);
+  gap: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.traceRow:last-child { border-bottom: 0; }
+.traceRow p { margin: 0 !important; }
+.findingsCard { padding: 28px !important; }
+.finding {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.finding:last-child { border-bottom: 0; }
+.finding > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.finding p { margin: 4px 0 0 !important; }
+.review strong { color: var(--warning); }
+
+@media (max-width: 760px) {
+  .metrics,
+  .sectionsGrid { grid-template-columns: 1fr; }
+  .metrics > div { padding: 16px 0; }
+  .metrics > div + div {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .sectionCard,
+  .unavailable { grid-column: 1; }
+  .traceRow {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
