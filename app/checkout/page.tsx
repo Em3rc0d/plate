@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CoverageList } from "@/components/marketing/coverage-list";
 import { Header, Footer } from "@/components/marketing/shell";
 import { OrderForm } from "@/components/checkout/order-form";
@@ -6,6 +7,10 @@ import { offeringName } from "@/src/config/commercial";
 import { commercialReadiness } from "@/src/config/commercial";
 import { normalizePlate } from "@/src/vehicle/normalize-plate";
 import { redirect } from "next/navigation";
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
+
 export default async function Page({
   searchParams,
 }: {
