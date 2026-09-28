@@ -94,6 +94,13 @@ export default async function Page({
           <p className="micro">
             {o.id} · Operación: {o.payment_reference || "No indicada"}
           </p>
+          {o.paid_at && (
+            <p>
+              <Link className="button outline" href={`/admin/orders/${o.id}`}>
+                Continuar pedido pagado
+              </Link>
+            </p>
+          )}
           {o.payment_proof_path && (
             <p>
               <a
