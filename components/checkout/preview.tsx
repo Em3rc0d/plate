@@ -1,4 +1,5 @@
 "use client";
+import { browserTrack } from "@/src/analytics/browser";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export function Preview({
     setBusy(true);
     setError("");
     setResult(null);
+    browserTrack("plate_submitted", { source: "preview" });
     try {
       const response = await fetch("/api/preview", {
         method: "POST",
@@ -43,7 +45,12 @@ export function Preview({
             : "No pudimos consultar la placa. Verifica el formato e intenta nuevamente.",
         );
       setResult(data);
+      browserTrack("preview_success", {
+        source: "preview",
+        status: String(data.status || "READY").toUpperCase().slice(0, 40),
+      });
     } catch (e) {
+      browserTrack("preview_failed", { source: "preview" });
       setError(e instanceof Error ? e.message : "No se pudo consultar.");
     } finally {
       setBusy(false);

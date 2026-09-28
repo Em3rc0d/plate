@@ -182,6 +182,7 @@ export interface OrderRow {
   terms_version: string | null;
   privacy_version: string | null;
   accepted_at: string | null;
+  analytics_id: string | null;
 }
 
 export interface CoverageInfo {

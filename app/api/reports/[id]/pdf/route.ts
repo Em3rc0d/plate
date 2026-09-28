@@ -17,7 +17,17 @@ export async function GET(
     const file = required(
       await db().storage.from("report-pdfs").download(path),
     );
-    await track("pdf_downloaded", row.id);
+    const order = required(
+      await db()
+        .from("orders")
+        .select("analytics_id")
+        .eq("id", row.order_id)
+        .single(),
+    );
+    if (order.analytics_id)
+      await track("pdf_downloaded", order.analytics_id, {
+        source: "report",
+      });
     return new Response(file, {
       headers: {
         "Content-Type": "application/pdf",

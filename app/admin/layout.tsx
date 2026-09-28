@@ -23,6 +23,7 @@ export default async function Layout({
             </div>
             <nav className="admin-nav" aria-label="Administración">
               <Link href="/admin">Resumen</Link>
+              <Link href="/admin/analytics">Conversión</Link>
               <Link href="/admin/orders">Pedidos</Link>
               <Link href="/admin/reports">Reportes</Link>
               <Link href="/admin/providers">Proveedores</Link>

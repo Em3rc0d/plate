@@ -1,5 +1,6 @@
 "use client";
 
+import { browserTrack } from "@/src/analytics/browser";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,10 @@ export function MercadoPagoCheckout({
       unresolved.current = true;
       setPaymentLocked(true);
       setBusy(true);
+      browserTrack("payment_submitted", {
+        source: "payment",
+        method: instrument.paymentMethodId === "yape" ? "MP_YAPE" : "MP_CARD",
+      });
       setError("");
       setMessage("");
       try {

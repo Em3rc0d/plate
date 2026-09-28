@@ -27,14 +27,15 @@ export async function POST(req: Request) {
       const order = required(
         await db()
           .from("orders")
-          .select("id,plate")
+          .select("id,plate,analytics_id")
           .eq("id", attempt.order_id)
           .single(),
       );
-      await track("payment_approved", order.id, {
-        provider: "mercadopago",
-        source: "webhook",
-      });
+      if (order.analytics_id)
+        await track("payment_approved", order.analytics_id, {
+          provider: "mercadopago",
+          source: "webhook",
+        });
       const { generateVehicleReport } = await import("@/src/vehicle/service");
       await generateVehicleReport({ plate: order.plate, orderId: order.id });
     }

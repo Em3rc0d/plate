@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { Header, Footer } from "@/components/marketing/shell";
 import { commercialReadiness } from "@/src/config/commercial";
 import { coverageLabels } from "@/src/config/providers";
 import { Preview } from "@/components/checkout/preview";
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
+
 export default async function Page({
   searchParams,
 }: {

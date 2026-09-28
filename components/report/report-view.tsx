@@ -1,5 +1,4 @@
 import { summarySchema } from "@/src/findings/ai-summary";
-import { PageEvent } from "@/components/marketing/page-event";
 import { legalNotice, productName } from "@/src/config/product";
 import type {
   EvidenceRecord,
@@ -191,7 +190,6 @@ export function ReportView({ row }: { row: ReportRow }) {
 
   return (
     <main id="main" className="report report-v2">
-      <PageEvent event="report_viewed" />
       <div className="wrap report-document">
         <header className={`report-header ${styles.hero}`}>
           <div className={styles.topLine}>
