@@ -1,3 +1,4 @@
+export const publicSiteUrl = "https://www.placaclara.com";
 export const productName = process.env.NEXT_PUBLIC_PRODUCT_NAME || "PlacaClara";
 export const legalNotice =
   "Este reporte consolida información disponible en las fuentes consultadas al momento de la consulta. La ausencia de registros no acredita por sí sola la inexistencia de obligaciones, siniestros, gravámenes u otros antecedentes fuera de la cobertura indicada. No reemplaza una revisión mecánica, certificación registral ni asesoría legal profesional.";
