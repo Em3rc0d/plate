@@ -48,6 +48,14 @@ type ProviderPayment = {
   payment_method_id?: string;
   date_last_updated?: string;
   transaction_amount_refunded?: number | string;
+  transaction_details?: {
+    net_received_amount?: number | string;
+  };
+  fee_details?: Array<{
+    type?: string;
+    amount?: number | string;
+    fee_payer?: string;
+  }>;
 };
 
 export type PaymentResult = {
@@ -169,6 +177,13 @@ function amountMinor(value: unknown) {
   return Math.round(number * 100);
 }
 
+function optionalMoney(value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return null;
+  return Math.round(number * 10000) / 10000;
+}
+
 async function attemptById(id: string) {
   return required(
     await db().from("payment_attempts").select("*").eq("id", id).single(),
@@ -217,6 +232,17 @@ function verifyProviderPayment(attempt: AttemptRow, raw: ProviderPayment) {
   const updated = new Date(raw.date_last_updated);
   if (!Number.isFinite(updated.getTime()))
     throw new Error("INVALID_PROVIDER_SNAPSHOT");
+  const providerFee = Array.isArray(raw.fee_details)
+    ? raw.fee_details
+        .filter((fee) => fee?.type === "mercadopago_fee")
+        .map((fee) => optionalMoney(fee?.amount))
+        .filter((value): value is number => value !== null)
+        .reduce((sum, value) => sum + value, 0)
+    : null;
+  const netReceived = optionalMoney(
+    raw.transaction_details?.net_received_amount,
+  );
+
   return {
     providerId: id,
     providerStatus: raw.status,
@@ -224,6 +250,8 @@ function verifyProviderPayment(attempt: AttemptRow, raw: ProviderPayment) {
     status: normalizeStatus(raw.status),
     liveMode: raw.live_mode,
     updatedAt: updated.toISOString(),
+    providerFee,
+    netReceived,
   };
 }
 
@@ -243,6 +271,20 @@ async function applySnapshot(attempt: AttemptRow, raw: ProviderPayment) {
     ) === true &&
     env.MERCADO_PAGO_LIVE_MODE &&
     snapshot.liveMode;
+
+  if (snapshot.liveMode && snapshot.status === "APPROVED") {
+    checked(
+      await db()
+        .from("payment_attempts")
+        .update({
+          provider_fee_pen: snapshot.providerFee,
+          provider_net_received_pen: snapshot.netReceived,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attempt.id),
+    );
+  }
+
   return {
     attemptId: attempt.id,
     providerPaymentId: snapshot.providerId,
