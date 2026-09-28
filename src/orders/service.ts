@@ -3,16 +3,24 @@ import { cookies } from "next/headers";
 import { db, checked, required } from "@/src/db/client";
 import { matchesToken, hash, token } from "@/src/utils/security";
 import { env, mercadoPagoConfigured } from "@/src/config/env";
+import { requireAdmin } from "@/src/db/admin";
 import { commercialReadiness } from "@/src/config/commercial";
 import type { OrderRow } from "@/src/vehicle/canonical";
 export async function customerOrder(id: string) {
   const order = checked(
     await db().from("orders").select("*").eq("id", id).maybeSingle(),
   ) as OrderRow | null;
+  if (!order) throw new Error("NOT_FOUND");
+
   const value = (await cookies()).get(`order_${id}`)?.value;
-  if (!order || !value || !matchesToken(value, order.access_token_hash))
-    throw new Error("NOT_FOUND");
-  return order;
+  if (value && matchesToken(value, order.access_token_hash)) return order;
+
+  // Admins may inspect/recover the customer payment page without rotating the
+  // customer's access token. This is especially useful across Vercel preview
+  // hostnames, where the original order cookie is host-scoped.
+  if (await requireAdmin().then(() => true).catch(() => false)) return order;
+
+  throw new Error("NOT_FOUND");
 }
 export async function createOrder(input: {
   plate: string;
