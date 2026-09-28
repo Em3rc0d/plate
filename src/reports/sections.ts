@@ -58,6 +58,25 @@ export const fieldLabels: Record<string, string> = {
   origin: "Jurisdicción",
   reference: "Referencia",
 };
+function scalarLabel(key: string, value: unknown) {
+  if (typeof value === "boolean") return value ? "Sí" : "No";
+  if (typeof value === "string") {
+    if (/^\\d{4}-\\d{2}-\\d{2}T/.test(value) && !Number.isNaN(Date.parse(value))) {
+      return new Date(value).toLocaleDateString("es-PE", {
+        timeZone: "UTC",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    }
+    if (key === "documentConsistency") {
+      if (value === "CONSISTENT") return "Consistente";
+      if (value === "INVALID") return "Inválida / requiere revisión";
+    }
+  }
+  return labels[String(value)] || String(value);
+}
+
 export function lines(value: unknown): string[] {
   if (value === null || value === undefined) return [];
   if (Array.isArray(value))
@@ -68,9 +87,7 @@ export function lines(value: unknown): string[] {
       .flatMap(([k, v]) =>
         typeof v === "object"
           ? [fieldLabels[k] || k, ...lines(v)]
-          : [
-              `${fieldLabels[k] || k}: ${typeof v === "boolean" ? (v ? "Sí" : "No") : labels[String(v)] || String(v)}`,
-            ],
+          : [`${fieldLabels[k] || k}: ${scalarLabel(k, v)}`],
       );
   return [String(value)];
 }
