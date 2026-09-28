@@ -58,7 +58,7 @@ function dedupeTraces(traces: EvidenceRecord[]) {
   return [
     ...new Map(
       traces.map((trace) => [
-        `${trace.originalSource}|${trace.provider}|${trace.checkedAt}|${trace.status}`,
+        `${trace.originalSource}|${trace.provider}|${trace.checkedAt}`,
         trace,
       ]),
     ).values(),
@@ -108,6 +108,37 @@ export function ReportView({ row }: { row: ReportRow }) {
   const insurance = byKey("insurance");
   const inspection = byKey("inspection");
   const fines = byKey("fines");
+
+  const visibleFindings = [
+    ...new Map(
+      r.findings
+        .filter((finding) => {
+          if (
+            [
+              "Fuente o campo no disponible",
+              "Fuente no configurada",
+              "Discrepancias entre datos",
+              "Información desactualizada",
+            ].includes(finding.title) &&
+            finding.detail ===
+              "Consulta la trazabilidad y las limitaciones de cada sección."
+          )
+            return false;
+          if (
+            r.registry.ownerIdentityAmbiguous &&
+            finding.title === "Múltiples identidades en el historial" &&
+            finding.detail ===
+              "El historial devuelto no acredita por sí solo el número total de transferencias."
+          )
+            return false;
+          return true;
+        })
+        .map((finding) => [
+          `${finding.title.trim()}|${finding.detail.trim()}`,
+          finding,
+        ]),
+    ).values(),
+  ];
 
   const overview = [
     {
@@ -310,9 +341,6 @@ export function ReportView({ row }: { row: ReportRow }) {
                     <div className={styles.traceRow} key={i}>
                       <strong>{trace.originalSource}</strong>
                       <p>
-                        {trace.status !== "VERIFIED"
-                          ? `${customerStates[trace.status]} · `
-                          : ""}
                         Consultado {limaDate(trace.checkedAt)} · hora de Lima
                       </p>
                     </div>
@@ -363,8 +391,8 @@ export function ReportView({ row }: { row: ReportRow }) {
         </div>
 
         <section className={`card ${styles.findings}`}>
-          {r.findings.length ? (
-            r.findings.map((f, i) => (
+          {visibleFindings.length ? (
+            visibleFindings.map((f, i) => (
               <article
                 className={`${styles.finding} ${f.severity === "REVIEW" ? styles.review : ""}`}
                 key={i}
