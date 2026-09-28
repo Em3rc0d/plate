@@ -3,7 +3,6 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { db, checked, required } from "@/src/db/client";
 import { env } from "@/src/config/env";
-import { generatePdf } from "./pdf-service";
 import { sendReport } from "@/src/email/report-ready";
 import { capture } from "@/src/observability";
 import type { ReportRow } from "@/src/vehicle/canonical";
@@ -27,6 +26,10 @@ export async function deliverReport(
     ) as ReportRow;
     row.report_json = upgradeReport(row.report_json);
     try {
+      // Keep PDFKit out of unrelated payment/report imports and load it only
+      // when a PDF is actually being generated. This also makes packaging
+      // failures catchable instead of crashing the whole serverless process.
+      const { generatePdf } = await import("./pdf-service");
       await generatePdf(row);
     } catch (error) {
       capture("pdf_failure", { report_id: row.id });
