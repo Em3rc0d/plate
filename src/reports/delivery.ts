@@ -10,6 +10,7 @@ export async function deliverReport(
   row: ReportRow,
   email: string,
   pdfOnly = false,
+  forceEmail = false,
 ) {
   const id = randomUUID();
   const claimed = checked(
@@ -49,11 +50,17 @@ export async function deliverReport(
     }
     let emailStatus: ReportRow["email_status"] = row.email_status;
     let emailError: string | null = null;
-    if (!pdfOnly && row.email_status !== "SENT") {
+    if (!pdfOnly && (forceEmail || row.email_status !== "SENT")) {
       let status: ReportRow["email_status"] = "NOT_CONFIGURED";
       if (env.RESEND_API_KEY && env.REPORT_FROM_EMAIL) {
         try {
-          await sendReport(row, email);
+          await sendReport(
+            row,
+            email,
+            forceEmail
+              ? `report-${row.id}-v${row.revision}-manual-${id}`
+              : undefined,
+          );
           status = "SENT";
         } catch (error) {
           const reason =
