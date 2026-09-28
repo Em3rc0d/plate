@@ -73,6 +73,11 @@ function scalarLabel(key: string, value: unknown) {
       if (value === "CONSISTENT") return "Consistente";
       if (value === "INVALID") return "Inválida / requiere revisión";
     }
+    if (key === "status") {
+      if (value === "ACTIVE") return "Vigente";
+      if (value === "EXPIRED") return "Vencido";
+      if (value === "UNKNOWN") return "Estado no determinado";
+    }
   }
   return labels[String(value)] || String(value);
 }
