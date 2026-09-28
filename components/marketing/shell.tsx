@@ -1,4 +1,4 @@
-import { bookOfClaimsUrl, env } from "@/src/config/env";
+import { env } from "@/src/config/env";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { productName, legalNotice } from "@/src/config/product";
@@ -59,8 +59,7 @@ export function Footer() {
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/terminos">Términos</Link>
           <Link href="/legal/reembolsos">Reembolsos</Link>
-          <a href={bookOfClaimsUrl}>Libro de Reclamaciones</a>
-          <Link href="/admin">Administración</Link>
+          <Link href="/libro-de-reclamaciones">Libro de Reclamaciones</Link>
         </div>
       </div>
       {env.BUSINESS_LEGAL_NAME && (
@@ -71,7 +70,7 @@ export function Footer() {
       )}
       {env.SUPPORT_EMAIL && (
         <p>
-          Soporte: <a href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a>
+          Soporte: <a href={`mailto:${env.SUPPORT_EMAIL}`}>Contactar soporte</a>
         </p>
       )}
       <p>{legalNotice}</p>
