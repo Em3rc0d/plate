@@ -4,7 +4,7 @@ import { db, checked, required } from "@/src/db/client";
 import { PdfDocument } from "./pdf-document";
 import type { ReportRow } from "@/src/vehicle/canonical";
 import { env } from "@/src/config/env";
-export async function generatePdf(row: ReportRow) {
+export async function generatePdf(row: ReportRow, force = false) {
   if (
     row.pdf_deleted_at ||
     (env.REPORT_RETENTION_DAYS &&
@@ -12,7 +12,7 @@ export async function generatePdf(row: ReportRow) {
         Date.now())
   )
     throw new Error("PDF_EXPIRED");
-  if (row.pdf_path) {
+  if (row.pdf_path && !force) {
     const existing = await db()
       .storage.from("report-pdfs")
       .download(row.pdf_path);
