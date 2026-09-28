@@ -6,6 +6,7 @@ import type { ReportRow } from "@/src/vehicle/canonical";
 import { lines, reportSections, fieldLabels } from "@/src/reports/sections";
 import Link from "next/link";
 import { ShareButton } from "./share-button";
+import styles from "./report-view.module.css";
 
 function limaDate(value: string) {
   return new Date(value).toLocaleString("es-PE", {
@@ -50,18 +51,18 @@ export function ReportView({ row }: { row: ReportRow }) {
     <main id="main" className="report report-v2">
       <PageEvent event="report_viewed" />
       <div className="wrap report-document">
-        <header className="report-header report-hero">
-          <div className="report-topline">
-            <Link className="report-brand" href="/">
+        <header className={`report-header ${styles.hero}`}>
+          <div className={styles.topLine}>
+            <Link className={styles.brand} href="/">
               {productName}
             </Link>
-            <span className="status report-state">{labels[row.status]}</span>
+            <span className={`status ${styles.state}`}>{labels[row.status]}</span>
           </div>
 
-          <div className="report-identity">
+          <div className={styles.identity}>
             <div className="plate">{r.identity.plate}</div>
             <div>
-              <p className="report-kicker">Reporte vehicular</p>
+              <p className={styles.kicker}>Reporte vehicular</p>
               <h1>
                 {r.identity.brand || "Vehículo"} {r.identity.model}
               </h1>
@@ -71,7 +72,7 @@ export function ReportView({ row }: { row: ReportRow }) {
             </div>
           </div>
 
-          <div className="report-actions">
+          <div className={styles.actions}>
             <a
               className="button primary"
               href={`/api/reports/${row.public_code}/pdf`}
@@ -88,16 +89,16 @@ export function ReportView({ row }: { row: ReportRow }) {
           </div>
         </header>
 
-        <section className="card report-summary-card">
-          <div className="report-section-heading">
+        <section className={`card ${styles.summaryCard}`}>
+          <div className={styles.sectionHeading}>
             <div>
-              <p className="report-kicker">Resumen ejecutivo</p>
+              <p className={styles.kicker}>Resumen ejecutivo</p>
               <h2>{stats.label}</h2>
             </div>
             <span className="status report-state">{labels[row.status]}</span>
           </div>
 
-          <div className="report-metrics">
+          <div className={styles.metrics}>
             <div>
               <strong>{stats.completed}</strong>
               <span>secciones verificadas</span>
@@ -112,13 +113,13 @@ export function ReportView({ row }: { row: ReportRow }) {
             </div>
           </div>
 
-          <p className="report-summary-note">
+          <p className={styles.summaryNote}>
             Este documento resume evidencia devuelta por las fuentes consultadas.
             No constituye una recomendación de compra.
           </p>
 
           {r.registry.ownerIdentityAmbiguous ? (
-            <div className="report-callout">
+            <div className={styles.callout}>
               <strong>Revisión registral recomendada</strong>
               <p>
                 Se detectaron registros históricos cuya identidad documental no
@@ -127,7 +128,7 @@ export function ReportView({ row }: { row: ReportRow }) {
             </div>
           ) : (
             r.registry.distinctOwnerCount !== undefined && (
-              <div className="report-callout">
+              <div className={styles.callout}>
                 <strong>Historial registral</strong>
                 <p>
                   {r.registry.distinctOwnerCount} identidades distintas aparecen
@@ -139,9 +140,9 @@ export function ReportView({ row }: { row: ReportRow }) {
           )}
         </section>
 
-        <div className="report-section-title">
+        <div className={styles.sectionTitle}>
           <div>
-            <p className="report-kicker">01 · Evidencia disponible</p>
+            <p className={styles.kicker}>01 · Evidencia disponible</p>
             <h2>Datos del vehículo y situación registral</h2>
           </div>
           <p>
@@ -151,8 +152,8 @@ export function ReportView({ row }: { row: ReportRow }) {
         </div>
 
         {dataSections.map((section) => (
-          <section className="card report-data-card" key={section.key}>
-            <div className="report-section-heading">
+          <section className={`card ${styles.dataCard}`} key={section.key}>
+            <div className={styles.sectionHeading}>
               <h2>{section.title}</h2>
               <div className="section-statuses" aria-label="Estados de la evidencia">
                 {[...new Set(section.traces.map((e) => e.status))].map(
@@ -166,7 +167,7 @@ export function ReportView({ row }: { row: ReportRow }) {
             </div>
 
             {section.available ? (
-              <div className="facts report-facts">
+              <div className={`facts ${styles.facts}`}>
                 {lines(section.value).map((line, i) => (
                   <div className="fact" key={i}>
                     {line}
@@ -174,21 +175,21 @@ export function ReportView({ row }: { row: ReportRow }) {
                 ))}
               </div>
             ) : (
-              <p className="report-empty">
+              <p className={styles.empty}>
                 No hay información disponible para esta sección. Esto no
                 acredita ausencia de registros.
               </p>
             )}
 
             {section.traces.some((e) => e.status === "NOT_FOUND") && (
-              <p className="report-inline-note">
+              <p className={styles.inlineNote}>
                 La fuente respondió correctamente y no devolvió registros para
                 esta sección.
               </p>
             )}
 
             {section.key === "fines" && (
-              <p className="report-inline-note">
+              <p className={styles.inlineNote}>
                 Cobertura declarada: SUTRAN, Lima y Callao. No incluye todas las
                 municipalidades ni acredita ausencia de papeletas fuera de esa
                 cobertura.
@@ -196,20 +197,20 @@ export function ReportView({ row }: { row: ReportRow }) {
             )}
 
             {section.traces.some((e) => e.status === "CONFLICT") && (
-              <p className="report-inline-note report-inline-warning">
+              <p className={`${styles.inlineNote} ${styles.warning}`}>
                 Existen datos incompatibles entre fuentes. El reporte conserva
                 la discrepancia para revisión.
               </p>
             )}
 
             {!!section.traces.length && (
-              <details className="report-trace">
+              <details className={styles.trace}>
                 <summary>
                   Ver trazabilidad y fuentes ({section.traces.length})
                 </summary>
                 <div className="evidence">
                   {section.traces.map((e, i) => (
-                    <div className="report-trace-row" key={i}>
+                    <div className={styles.traceRow} key={i}>
                       <div>
                         <span className={`status ${e.status}`}>
                           {labels[e.status]}
@@ -234,9 +235,9 @@ export function ReportView({ row }: { row: ReportRow }) {
 
         {!!pendingSections.length && (
           <>
-            <div className="report-section-title">
+            <div className={styles.sectionTitle}>
               <div>
-                <p className="report-kicker">02 · Cobertura pendiente</p>
+                <p className={styles.kicker}>02 · Cobertura pendiente</p>
                 <h2>Fuentes aún no integradas o no configuradas</h2>
               </div>
               <p>
@@ -246,14 +247,14 @@ export function ReportView({ row }: { row: ReportRow }) {
               </p>
             </div>
 
-            <div className="report-coverage-grid">
+            <div className={styles.coverageGrid}>
               {pendingSections.map((section) => {
                 const sources = [
                   ...new Set(section.traces.map((e) => e.originalSource)),
                 ];
                 return (
-                  <section className="report-coverage-card" key={section.key}>
-                    <div className="report-section-heading">
+                  <section className={styles.coverageCard} key={section.key}>
+                    <div className={styles.sectionHeading}>
                       <h3>{section.title}</h3>
                       <span className="status NOT_CONFIGURED">
                         Fuente no configurada
@@ -275,17 +276,17 @@ export function ReportView({ row }: { row: ReportRow }) {
           </>
         )}
 
-        <div className="report-section-title">
+        <div className={styles.sectionTitle}>
           <div>
-            <p className="report-kicker">03 · Revisión</p>
+            <p className={styles.kicker}>03 · Revisión</p>
             <h2>Hallazgos y próximos puntos de control</h2>
           </div>
         </div>
 
-        <section className="card report-findings">
+        <section className={`card ${styles.findings}`}>
           {r.findings.length ? (
             r.findings.map((f, i) => (
-              <article className={`report-finding ${f.severity}`} key={i}>
+              <article className={`${styles.finding} ${f.severity === "REVIEW" ? styles.review : ""}`} key={i}>
                 <span>{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <strong>{f.title}</strong>
@@ -294,15 +295,15 @@ export function ReportView({ row }: { row: ReportRow }) {
               </article>
             ))
           ) : (
-            <p className="report-empty">
+            <p className={styles.empty}>
               No se registraron hallazgos adicionales en la evidencia disponible.
             </p>
           )}
         </section>
 
         {summary.success && (
-          <section className="card report-ai-card">
-            <p className="report-kicker">Lectura asistida</p>
+          <section className={`card ${styles.aiCard}`}>
+            <p className={styles.kicker}>Lectura asistida</p>
             <h2>Explicación asistida por IA</h2>
             <p className="muted">
               Lectura auxiliar de la evidencia; no sustituye los datos ni
@@ -326,14 +327,14 @@ export function ReportView({ row }: { row: ReportRow }) {
           </section>
         )}
 
-        <div className="report-section-title">
+        <div className={styles.sectionTitle}>
           <div>
-            <p className="report-kicker">04 · Transparencia</p>
+            <p className={styles.kicker}>04 · Transparencia</p>
             <h2>Fuentes, cobertura y limitaciones</h2>
           </div>
         </div>
 
-        <section className="card report-methodology">
+        <section className={`card ${styles.methodology}`}>
           <div>
             <h3>Fuentes mencionadas en esta consulta</h3>
             <ul>
@@ -353,7 +354,7 @@ export function ReportView({ row }: { row: ReportRow }) {
               datos incompatibles.
             </p>
           </div>
-          <div className="report-limitations">
+          <div className={styles.limitations}>
             <h3>Limitaciones</h3>
             <p>{legalNotice}</p>
             <p className="muted">
@@ -364,7 +365,7 @@ export function ReportView({ row }: { row: ReportRow }) {
           </div>
         </section>
 
-        <footer className="report-footer">
+        <footer className={styles.footer}>
           <span>Reporte {row.id}</span>
           <span>Generado {limaDate(row.created_at)} · hora de Lima</span>
         </footer>
