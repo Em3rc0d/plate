@@ -16,11 +16,6 @@ export const metadata: Metadata = {
   description:
     "Consulta información vehicular por placa en Perú con fuente, fecha y cobertura clara. Revisa identidad, registro, SOAT, CITV y papeletas según las fuentes habilitadas.",
   applicationName: productName,
-  alternates: {
-    languages: {
-      "es-PE": publicSiteUrl,
-    },
-  },
   openGraph: {
     type: "website",
     locale: "es_PE",
@@ -28,7 +23,6 @@ export const metadata: Metadata = {
     title: "PlacaClara | Consulta vehicular por placa en Perú",
     description:
       "Información vehicular con fuente, fecha y cobertura clara antes de comprar un usado.",
-    url: publicSiteUrl,
     images: [
       {
         url: "/placaclara-hero-master.webp",
