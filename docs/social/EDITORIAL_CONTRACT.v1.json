@@ -1,0 +1,260 @@
+{
+  "schema_version": "placaclara-social-policy/v1",
+  "status": "ACTIVE_FOR_DRAFTING_ONLY",
+  "brand_id": "placaclara",
+  "locale": "es-PE",
+  "precedence": [
+    "src/config/providers.ts + runtime enabledCapabilities() and commercialReadiness()",
+    "src/config/env.ts REPORT_PRICE_PEN active deployment",
+    "src/config/product.ts legalNotice and source status semantics",
+    "src/analytics/index.ts first-party event allowlist",
+    "DESIGN.md brand/product authenticity and docs/README.md precedence",
+    "docs/social/SOCIAL_EDITORIAL_CONTRACT.md as subordinate editorial guidance"
+  ],
+  "canonical_site": "https://www.placaclara.com",
+  "canonical_mark": "public/placaclara-mark.svg",
+  "audiences": [
+    "people_evaluating_used_vehicle_peru",
+    "vehicle_buyers_needing_documentary_context"
+  ],
+  "roles": {
+    "DISCOVERY": {
+      "job": "Un error o pregunta real de compra de usado, sin alarmismo",
+      "primary_actions": [
+        "LEARN",
+        "SAVE"
+      ],
+      "primary_metrics": [
+        "qualified_profile_visits",
+        "saves"
+      ]
+    },
+    "EDUCATION": {
+      "job": "Aclarar fuente, fecha, estado o cobertura y limites",
+      "primary_actions": [
+        "SAVE",
+        "SHARE"
+      ],
+      "primary_metrics": [
+        "saves",
+        "shares"
+      ]
+    },
+    "TRUST": {
+      "job": "Demostrar transparencia sobre limites y proceso, sin falsos resultados",
+      "primary_actions": [
+        "VIEW_SCOPE",
+        "VIEW_SAMPLE"
+      ],
+      "primary_metrics": [
+        "qualified_site_visits",
+        "preview_success"
+      ]
+    },
+    "COVERAGE_INTENT": {
+      "job": "Pasar de preocupacion concreta a revisar cobertura disponible para una placa",
+      "primary_actions": [
+        "CHECK_COVERAGE"
+      ],
+      "primary_metrics": [
+        "plate_submitted",
+        "preview_success"
+      ]
+    },
+    "PURCHASE_INTENT": {
+      "job": "Facilitar decidir un pago unico informado tras ver alcance/precio",
+      "primary_actions": [
+        "CHECK_COVERAGE"
+      ],
+      "primary_metrics": [
+        "checkout_started",
+        "payment_approved"
+      ]
+    }
+  },
+  "platforms": {
+    "tiktok": {
+      "allowed_formats": [
+        "vertical_9_16",
+        "photo_carousel"
+      ],
+      "safe_zone_status": "OBSERVED_REFERENCE_FROM_ANOTHER_PROFILE_NEEDS_PLACACLARA_DEVICE_VALIDATION",
+      "working_margins_px": {
+        "top": 260,
+        "bottom": 500,
+        "right": 170,
+        "left": 60
+      }
+    },
+    "instagram": {
+      "allowed_formats": [
+        "square_1_1",
+        "portrait_4_5",
+        "story_9_16"
+      ],
+      "safe_zone_status": "UNKNOWN_UNTIL_PLATFORM_PREVIEW",
+      "working_margins_px": null
+    }
+  },
+  "claims": {
+    "provenance_types": [
+      "OFFICIAL",
+      "OBSERVED",
+      "INFERRED",
+      "INSPIRED",
+      "GENERATED"
+    ],
+    "capabilities": [
+      "IDENTITY",
+      "REGISTRY_CURRENT_OWNER",
+      "REGISTRY_HISTORY",
+      "RESTRICTIONS",
+      "SOAT",
+      "CITV",
+      "FINES_NATIONAL",
+      "FINES_LIMA",
+      "FINES_CALLAO",
+      "THEFT",
+      "CAPTURE_ORDERS",
+      "CLAIMS",
+      "GNV",
+      "VALUATION"
+    ],
+    "restricted_categories": [
+      "PRICE",
+      "COVERAGE",
+      "SOURCE_STATUS",
+      "PAYMENT",
+      "RESULT",
+      "COMPARISON",
+      "TESTIMONIAL",
+      "AUTHORITY"
+    ],
+    "forbidden_promises": [
+      "guaranteed_vehicle_safety",
+      "universal_history",
+      "certified_no_accidents",
+      "no_fines_from_partial_coverage",
+      "mechanical_clearance",
+      "official_state_affiliation",
+      "certain_roi_or_savings",
+      "unverified_social_proof",
+      "manufactured_urgency",
+      "unverified_discount"
+    ],
+    "code_status_mapping": {
+      "VERIFIED": "source_returned_data_only",
+      "NOT_FOUND": "no_records_returned_not_absence",
+      "UNAVAILABLE": "no_response_not_absence",
+      "NOT_CONFIGURED": "not_enabled",
+      "STALE": "outdated",
+      "CONFLICT": "contradictory_data"
+    },
+    "require_current_snapshot_for": [
+      "PRICE",
+      "COVERAGE",
+      "PAYMENT",
+      "RESULT"
+    ],
+    "approval_mode": "HUMAN_REVIEW_WITH_EVIDENCE_REFS"
+  },
+  "novelty": {
+    "dimensions": [
+      "topic",
+      "angle",
+      "lesson",
+      "hook_family",
+      "example",
+      "visual_pattern",
+      "structure",
+      "cta"
+    ],
+    "scope": [
+      "published",
+      "scheduled",
+      "approved",
+      "planned"
+    ],
+    "minimum_reference": "full_available_history_and_current_schedule",
+    "unknown_corpus_result": "REVIEW_REQUIRED",
+    "cooldown_preference_days": 7,
+    "prevent_semantic_repeat": true
+  },
+  "creative": {
+    "website_design_scope": "DESIGN.md governs product UI, not an automatic social composition template",
+    "social_direction": "Premium, social-native, narrative scenes with truthful documentary content, real visual anchor, concise hierarchy and distinct treatment per post",
+    "must": [
+      "authentic_mark_from_repository",
+      "source_and_limit_not_hidden",
+      "visual_teaches_without_caption_rescue",
+      "phone_legibility",
+      "real_scene_or_clearly_labeled_illustration",
+      "design_approval_distinct_from_technical_check",
+      "platform_preview_for_safe_zones"
+    ],
+    "forbidden": [
+      "invented_vehicle_report",
+      "fabricated_checked_states",
+      "synthetic_personal_customer_claim",
+      "misleading_before_after",
+      "implied_government_affiliation",
+      "copied_visual_templates",
+      "generated_alternative_logo",
+      "fake_price"
+    ],
+    "one_main_action_per_piece": true
+  },
+  "release": {
+    "owner_approval_required": true,
+    "auto_post_authority": false,
+    "provider_receipt_required_for_scheduled_or_published": true,
+    "declaration_requires_external_reconciliation": true,
+    "ready_for_manual_scheduling_requires_complete_gates": true,
+    "explicitly_forbidden": [
+      "autoscheduling_by_json",
+      "self_approval",
+      "claiming_published_without_provider_receipt",
+      "reusing_approved_artifact_after_substantive_copy_change"
+    ]
+  },
+  "measurement": {
+    "first_party_events": [
+      "landing_view",
+      "plate_submitted",
+      "preview_success",
+      "checkout_started",
+      "payment_submitted",
+      "payment_approved",
+      "report_ready",
+      "report_viewed"
+    ],
+    "external_social_metrics": [
+      "views",
+      "saves",
+      "shares",
+      "comments",
+      "profile_visits",
+      "follows",
+      "outbound_clicks"
+    ],
+    "attribution_status_default": "UNKNOWN",
+    "no_per_post_sale_claim_without_verified_join": true,
+    "no_causality_from_single_post": true,
+    "observation_windows": [
+      "T_PLUS_24H",
+      "T_PLUS_7D"
+    ],
+    "promotion_requires": "repeat_comparable_evidence_and_human_review",
+    "traffic_modes": [
+      "ORGANIC",
+      "PAID",
+      "MIXED",
+      "UNKNOWN"
+    ]
+  },
+  "cost": {
+    "external_paid_api_required": false,
+    "provider_test_calls_required": false,
+    "new_dependencies_required": false
+  }
+}

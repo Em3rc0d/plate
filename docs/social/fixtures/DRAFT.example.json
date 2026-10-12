@@ -1,0 +1,107 @@
+{
+  "schema_version": "placaclara-social-package/v1",
+  "content_id": "PC-SYNTHETIC-EXAMPLE-0001",
+  "brand_id": "placaclara",
+  "platform": "tiktok",
+  "locale": "es-PE",
+  "objective": "EDUCATION",
+  "editorial": {
+    "audience_problem": "Confundir fuente sin respuesta con un historial limpio",
+    "topic_id": "source-status-unknown",
+    "angle_id": "unknown-not-clear",
+    "lesson_id": "interpret-source-status",
+    "hook_family": "two-states-not-the-same",
+    "primary_action": "SAVE"
+  },
+  "copy": {
+    "hook": "Sin registros no siempre significa sin antecedentes",
+    "subhook": "La cobertura y la respuesta de una fuente no son lo mismo.",
+    "caption": "Borrador ficticio de QA. No publicar.",
+    "cta": "Guarda esta distinción para tu próxima búsqueda.",
+    "alt_text": "Borrador de comparación entre estados de fuente, no un reporte real.",
+    "visual_text": [
+      "Sin registros devueltos ≠ sin antecedentes"
+    ]
+  },
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "Una fuente puede no devolver registros y no demostrar ausencia de antecedentes fuera de la cobertura.",
+      "category": "EDUCATION",
+      "provenance": "OFFICIAL",
+      "evidence_refs": [
+        "src/config/product.ts",
+        "components/marketing/coverage-list.tsx"
+      ],
+      "verified_at": "2026-10-12",
+      "capability_code": null,
+      "limitation": "Datos sujetos a la cobertura habilitada y respuesta de cada fuente."
+    }
+  ],
+  "product_snapshot": {
+    "captured_at": null,
+    "evidence_ref": null,
+    "price_pen": null,
+    "enabled_capabilities": [],
+    "commercial_ready": null,
+    "launch_profile": null,
+    "live_deployment_verified": false
+  },
+  "novelty": {
+    "status": "REVIEW_REQUIRED",
+    "checked_dimensions": [],
+    "published_ref": null,
+    "scheduled_ref": null,
+    "planned_ref": null,
+    "approved_ref": null,
+    "review_ref": null
+  },
+  "creative": {
+    "format": "vertical_9_16",
+    "asset_ref": null,
+    "sha256": null,
+    "mark_ref": "public/placaclara-mark.svg",
+    "visual_scope": "DRAFT",
+    "safe_zone_review_ref": null,
+    "phone_review_ref": null,
+    "design_approval_ref": null,
+    "rights_review_ref": null,
+    "illustration_disclosure": "Illustration only; no personal or provider result."
+  },
+  "gates": {
+    "factual": "PENDING",
+    "product_claims": "PENDING",
+    "price": "PENDING",
+    "novelty": "PENDING",
+    "design": "PENDING",
+    "safe_zone": "PENDING",
+    "legal": "PENDING",
+    "owner": "PENDING"
+  },
+  "release": {
+    "status": "DRAFT",
+    "owner_receipt": null,
+    "scheduled_at": null,
+    "provider_receipt": null,
+    "published_url": null
+  },
+  "measurement": {
+    "hypothesis": "Un estado de fuente explicado claramente puede producir guardados utiles.",
+    "primary_metric": "saves",
+    "window": "T_PLUS_24H",
+    "traffic_mode": "UNKNOWN",
+    "attribution": "UNKNOWN",
+    "baseline_ref": null,
+    "external_receipt": null
+  },
+  "gate_receipts": {
+    "factual": null,
+    "product_claims": null,
+    "price": null,
+    "novelty": null,
+    "design": null,
+    "safe_zone": null,
+    "legal": null,
+    "owner": null
+  }
+}

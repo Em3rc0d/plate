@@ -106,6 +106,10 @@ La URL pública canónica es `https://www.placaclara.com`.
 
 El código incluye metadata, structured data, `robots.txt`, `sitemap.xml` y `noindex` para superficies transaccionales/privadas. La analítica first-party usa un UUID pseudónimo por sesión y no guarda placa, correo, teléfono ni credenciales de pago en `analytics_events`.
 
+## Contenidos sociales
+
+La producción editorial de PlacaClara tiene su contrato independiente en [docs/social/README.md](docs/social/README.md). El marketing debe reflejar capacidades y precio reales del despliegue, no inventar resultados, y no tiene autoridad automática para programar o publicar.
+
 ## Documentación
 
 Empieza en [docs/README.md](docs/README.md). La documentación histórica se conserva, pero no tiene precedencia sobre código, migraciones ni configuración real.
