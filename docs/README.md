@@ -13,6 +13,10 @@ Este directorio es el índice operativo del repositorio. La documentación está
 - [Checklist de lanzamiento](../LAUNCH-CHECKLIST.md): gates pendientes y ya certificados.
 - [Estado de build](../BUILD-STATUS.md): fotografía técnica del estado actual.
 
+## Contrato editorial de redes
+
+- [PlacaClara Social v1](social/README.md): contratos editoriales versionados, límites de claims/precio/cobertura, máquina de estados, memoria anti-repetición, CTA por objetivo, preflight offline y UAT pendiente. **No autoriza publicar ni altera el producto.**
+
 ## Evidencia histórica
 
 Estos archivos documentan decisiones o certificaciones de momentos concretos. No sustituyen al código ni a la configuración del entorno actual.
