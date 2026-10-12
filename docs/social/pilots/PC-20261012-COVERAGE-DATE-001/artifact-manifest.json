@@ -1,0 +1,55 @@
+{
+  "content_id": "PC-20261012-COVERAGE-DATE-001",
+  "brand_id": "placaclara",
+  "platform": "tiktok",
+  "status": "DRAFT_BLOCKED",
+  "original": {
+    "file": "consulta_la_placa_antes_de_comprar.png",
+    "size_px": [
+      941,
+      1672
+    ],
+    "sha256": "01e919fa77f437db7b6c01c2b48077495c370db89a70d16505e739360516ea73"
+  },
+  "normalized": {
+    "file": "PC-20261012-COVERAGE-DATE-001-1080x1920-REFERENCE.png",
+    "size_px": [
+      1080,
+      1920
+    ],
+    "sha256": "7daa15667eef5238cd208248011a5243b8b83d31ce1849f44499265a61fcf64f",
+    "operation": "Lanczos resize only; image text, mark and layout not altered",
+    "qa": "NOT_CLEARED"
+  },
+  "qa": {
+    "overlay": "PC-20261012-SAFEZONES-PROVISIONAL-OVERLAY.png",
+    "phone_view": "PC-20261012-270x480-REFERENCE.png",
+    "reference_insets_px": {
+      "top": 260,
+      "bottom": 500,
+      "left": 60,
+      "right": 170
+    },
+    "status": "PENDING: protected zone includes top brand and bottom CTA; studio overlay not checked"
+  },
+  "design": {
+    "owner_feedback": "Me gusta mucho!",
+    "scope": "creative_direction_only",
+    "anti_uncanny_valley": "avoid synthetic faces, broken limbs/hands, unrealistic phone use and fabricated reports; visible illustrative disclosure"
+  },
+  "blocking": [
+    "commercial_runtime_snapshot",
+    "complete_published_scheduled_planned_approved_novelty",
+    "exact_brand_mark_in_composited_export",
+    "platform_safe_zones",
+    "owner_final_pixel_signoff",
+    "copyright_assets_and_legal"
+  ],
+  "source_of_media": "User conversation attachment/ZIP; binary assets not committed to GitHub",
+  "release": {
+    "status": "DRAFT",
+    "scheduled_at": null,
+    "provider_receipt": null,
+    "published_url": null
+  }
+}

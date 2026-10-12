@@ -95,13 +95,13 @@
   },
   "creative": {
     "format": "vertical_9_16",
-    "asset_ref": "consulta_la_placa_antes_de_comprar.png",
-    "sha256": "01e919fa77f437db7b6c01c2b48077495c370db89a70d16505e739360516ea73",
+    "asset_ref": "PC-20261012-COVERAGE-DATE-001-1080x1920-REFERENCE.png",
+    "sha256": "7daa15667eef5238cd208248011a5243b8b83d31ce1849f44499265a61fcf64f",
     "mark_ref": "public/placaclara-mark.svg",
     "visual_scope": "RENDERED_UNREVIEWED",
-    "safe_zone_review_ref": null,
-    "phone_review_ref": null,
-    "design_approval_ref": "USER_FEEDBACK_2026-10-12: 'Me gusta mucho!' (aesthetic direction accepted only; final pixel/release gates remain PENDING)",
+    "safe_zone_review_ref": "PC-20261012-SAFEZONES-PROVISIONAL-OVERLAY.png | diagnostic only, not TikTok Studio approved",
+    "phone_review_ref": "PC-20261012-270x480-REFERENCE.png | scale reference only, not a device QA receipt",
+    "design_approval_ref": "USER_FEEDBACK_2026-10-12: 'Me gusta mucho!' | concept direction accepted (not release/asset certification)",
     "rights_review_ref": null,
     "illustration_disclosure": "ILUSTRACIÓN CONCEPTUAL · NO ES UN REPORTE REAL"
   },

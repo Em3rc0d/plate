@@ -21,3 +21,7 @@ La segunda llamada DEBE devolver exit code 1 y estado BLOCKED: la fixture no rep
 **No confundir** una validación de forma y receipts autodeclarados con evidencia independiente de proveedor, producto, diseño o publicaciones. Sin cola Scheduled confiable, el estado de novedad permanece REVIEW_REQUIRED.
 
 Toda copia publicitaria debe comprobar el alcance real a través de src/config/providers.ts, src/config/commercial.ts, src/config/env.ts y el aviso de src/config/product.ts. Una simulación no puede convertirse en una afirmación comercial.
+
+## Pilotos registrados (no certificados)
+
+- [PC-20261012-COVERAGE-DATE-001](pilots/PC-20261012-COVERAGE-DATE-001/README.md): visual premium aprobado como dirección, normalizado a 1080×1920 para revisión; release DRAFT/BLOCKED por brand/safe-zone/novelty/commercial snapshot y QA en plataforma pendientes.
