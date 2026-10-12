@@ -49,6 +49,7 @@ export function validateSocialPackage(doc,policy,schema,now=new Date()){
   doc.claims.some(c=>policy.claims.require_current_snapshot_for.includes(c.category))||priceMentions.length>0;
  for(const claim of doc.claims){
    if(!has(claim.claim_id)||!has(claim.text)||!claim.evidence_refs.every(has)||!claim.evidence_refs.length)fail(`Claim ${claim.claim_id}: missing verifiable evidence refs`);
+   if(!has(claim.verified_at))fail(`Claim ${claim.claim_id}: verification date required`);
    if(claim.verified_at!==null&&!/^\d{4}-\d{2}-\d{2}$/.test(claim.verified_at))fail(`Claim ${claim.claim_id}: bad verification date`);
    if(policy.claims.restricted_categories.includes(claim.category)&&
      !["OFFICIAL","OBSERVED"].includes(claim.provenance))fail(`Claim ${claim.claim_id}: restricted claims require OFFICIAL or OBSERVED evidence`);
@@ -73,7 +74,10 @@ export function validateSocialPackage(doc,policy,schema,now=new Date()){
  }
  if(doc.objective==="PURCHASE_INTENT" && doc.product_snapshot.commercial_ready!==true)fail("Purchase-intent campaign requires verified commercial readiness");
  if(doc.objective==="COVERAGE_INTENT" && doc.product_snapshot.enabled_capabilities.length===0)fail("Coverage-intent campaign requires verified enabled coverage");
- for(const gate of ["factual","product_claims","price","novelty","design","safe_zone","legal"])needs(gate);
+ for(const gate of ["factual","product_claims","price","novelty","design","safe_zone","legal"]){
+   needs(gate);
+   if(!has(doc.gate_receipts[gate]))fail(`Gate ${gate}: review receipt missing`);
+ }
  if(doc.novelty.status!=="PASS")fail("Novelty unresolved");
  if(doc.novelty.checked_dimensions.length!==policy.novelty.dimensions.length ||
    !policy.novelty.dimensions.every(d=>doc.novelty.checked_dimensions.includes(d)))fail("Novelty comparison dimensions incomplete");
@@ -87,6 +91,7 @@ export function validateSocialPackage(doc,policy,schema,now=new Date()){
  if(doc.release.status!=="DRAFT"&&doc.release.status!=="READY_FOR_HUMAN_REVIEW"){
    needs("owner");
    if(!has(doc.release.owner_receipt))fail("Owner signoff receipt missing");
+   if(!has(doc.gate_receipts.owner))fail("Owner review-gate receipt missing");
  }
  if(["SCHEDULED","PUBLISHED"].includes(doc.release.status)){
    if(!has(doc.release.provider_receipt)||!utc(doc.release.scheduled_at))fail("External scheduled/published status has no provider receipt and time");

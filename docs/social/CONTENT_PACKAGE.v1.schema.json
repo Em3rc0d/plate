@@ -18,7 +18,8 @@
     "creative",
     "gates",
     "release",
-    "measurement"
+    "measurement",
+    "gate_receipts"
   ],
   "properties": {
     "schema_version": {
@@ -581,6 +582,70 @@
           ]
         },
         "external_receipt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "gate_receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "factual",
+        "product_claims",
+        "price",
+        "novelty",
+        "design",
+        "safe_zone",
+        "legal",
+        "owner"
+      ],
+      "properties": {
+        "factual": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "product_claims": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "price": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "novelty": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "design": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "safe_zone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "legal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "owner": {
           "type": [
             "string",
             "null"

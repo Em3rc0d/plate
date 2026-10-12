@@ -93,5 +93,15 @@
     "attribution": "UNKNOWN",
     "baseline_ref": null,
     "external_receipt": null
+  },
+  "gate_receipts": {
+    "factual": null,
+    "product_claims": null,
+    "price": null,
+    "novelty": null,
+    "design": null,
+    "safe_zone": null,
+    "legal": null,
+    "owner": null
   }
 }

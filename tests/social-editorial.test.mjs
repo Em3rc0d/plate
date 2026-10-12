@@ -9,6 +9,7 @@ function ready(){
  const x=clone(fixture);
  x.release.status="READY_FOR_HUMAN_REVIEW";
  x.gates=Object.fromEntries(Object.keys(x.gates).map(k=>[k,k==="owner"?"PENDING":"PASS"]));
+ x.gate_receipts=Object.fromEntries(Object.keys(x.gates).map(k=>[k,k==="owner"?null:"review-receipt-"+k]));
  x.novelty={status:"PASS",checked_dimensions:[...policy.novelty.dimensions],published_ref:"review-published",scheduled_ref:"review-scheduled",planned_ref:"review-planned",approved_ref:"review-approved",review_ref:"review-novelty"};
  x.creative={...x.creative,visual_scope:"REVIEWED",asset_ref:"test-artifact-not-a-real-post.png",sha256:"a".repeat(64),safe_zone_review_ref:"safe-proof",phone_review_ref:"phone-proof",design_approval_ref:"design-proof",rights_review_ref:"rights-proof"};
  return x;
@@ -29,3 +30,5 @@ test("missing claim evidence fails",()=>{const x=ready();x.claims[0].evidence_re
 test("unsupported future media format fails",()=>{const x=ready();x.platform="instagram";x.creative.format="vertical_9_16";assert.equal(check(x).status,"BLOCKED");});
 test("visual design approval separate from layout pass",()=>{const x=ready();x.creative.design_approval_ref=null;assert.equal(check(x).status,"BLOCKED");});
 test("price mismatch to live verified snapshot fails",()=>{const x=ready();x.copy.hook="Precio S/8.90";x.claims.push({...x.claims[0],claim_id:"P1",text:"Precio",category:"PRICE"});x.product_snapshot={captured_at:now,evidence_ref:"real-runtime-snapshot-ref",price_pen:9.9,enabled_capabilities:["IDENTITY"],commercial_ready:true,launch_profile:"REGISTRY_LEAN",live_deployment_verified:true};assert.equal(check(x).status,"BLOCKED");});
+test("gate PASS without receipt is rejected",()=>{const x=ready();x.gate_receipts.price=null;assert.equal(check(x).status,"BLOCKED");});
+test("undated source claim cannot be promoted",()=>{const x=ready();x.claims[0].verified_at=null;assert.equal(check(x).status,"BLOCKED");});
