@@ -95,13 +95,13 @@
   },
   "creative": {
     "format": "vertical_9_16",
-    "asset_ref": "placaclara_fecha_fuente_cobertura_tiktok_1080x1920.png",
-    "sha256": "ff1b7f89d6358485ac7a8cc9c2e54ccd786bb3c0cf19c0640617c5354c6731db",
+    "asset_ref": "consulta_la_placa_antes_de_comprar.png",
+    "sha256": "01e919fa77f437db7b6c01c2b48077495c370db89a70d16505e739360516ea73",
     "mark_ref": "public/placaclara-mark.svg",
     "visual_scope": "RENDERED_UNREVIEWED",
-    "safe_zone_review_ref": "qa_safe_zone_overlay.png (geometry; app preview remains pending)",
-    "phone_review_ref": "qa_phone_270x480.png (simulation; owner/device review pending)",
-    "design_approval_ref": null,
+    "safe_zone_review_ref": null,
+    "phone_review_ref": null,
+    "design_approval_ref": "USER_FEEDBACK_2026-10-12: 'Me gusta mucho!' (aesthetic direction accepted only; final pixel/release gates remain PENDING)",
     "rights_review_ref": null,
     "illustration_disclosure": "ILUSTRACIÓN CONCEPTUAL · NO ES UN REPORTE REAL"
   },

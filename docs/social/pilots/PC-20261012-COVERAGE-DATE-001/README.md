@@ -8,16 +8,16 @@ Un solo CTA: «Consulta la placa y revisa la cobertura disponible en placaclara.
 KPI candidato: plate_submitted, T+24h; atribución por post UNKNOWN.
 
 ## Entregables generados
-- Póster 1080×1920 de calidad visual premium: archivo `placaclara_fecha_fuente_cobertura_tiktok_1080x1920.png`.
-- Hash de PNG aprobado para cotejo: `ff1b7f89d6358485ac7a8cc9c2e54ccd786bb3c0cf19c0640617c5354c6731db`.
-- Base generada con IA, tipografía/CTA deterministas, isotipo exactamente derivado de `public/placaclara-mark.svg`.
+- Arte actualizado tras feedback visual: `consulta_la_placa_antes_de_comprar.png`, **941×1672 (aprox. 9:16)**. La versión final normalizada a 1080×1920 y las zonas seguras aún deben certificarse.
+- SHA-256 del PNG más reciente: `01e919fa77f437db7b6c01c2b48077495c370db89a70d16505e739360516ea73`. Este hash identifica un render, NO una autorización de publicación.
+- Arte final de esta iteración generado con IA. **Texto y logo incrustados requieren cotejo/recomposición determinista con `public/placaclara-mark.svg`**; no afirmar correspondencia exacta de marca hasta hacerlo.
 - Caption/alt text/JSON están en `package.json` (caption es campo `copy.caption`).
 - **El binario PNG no se almacenó en GitHub.** El archivo fuente y render quedaron en el ZIP de la conversación. No confundir este expediente con alojamiento de imagen ni con media receipt externo.
 
 ## Evidencia comprobada
 - Ref code: `src/config/product.ts`, `components/marketing/coverage-list.tsx`, `components/marketing/plate-form.tsx`, `app/(marketing)/page.tsx`. Lo observado es el diseño del flujo y su semántica, no un resultado real para una placa.
 - Vercel: el despliegue del dominio se reporta READY; no se inspeccionaron secretos ni se comprobó un snapshot de capacidades/precio/live readiness.
-- Preview local 270×480 y overlay de zonas conservadoras x60..910, y260..1420. TikTok Studio aún no inspeccionado.
+- El preview 270×480 y overlay anteriores pertenecen a un asset distinto: **no aplican a este nuevo SHA**. La nueva pieza tiene dimensiones 941×1672; debe revisarse sobre interfaz real de TikTok, con las áreas seguras reescaladas y especial atención al CTA inferior. TikTok Studio no inspeccionado.
 - Antirrep: revisados los ejemplos visuales aportados por el usuario; el tema sobre FECHA/SOURCE se diferencia de estética, vínculo con vendedor, kilometraje, notaría y precio. NO se auditó todo published/scheduled/planned/approved de las cuentas.
 
 ## Gates
@@ -39,3 +39,6 @@ La prueba NO convierte los asserts declarados en verificación independiente. No
 
 ## Siguiente decisión
 Revisar pieza en el dispositivo / TikTok Studio, asegurar brand y legal, obtener captura read-only de enabledCapabilities() / commercialReadiness() / precio efectivo, verificar toda la cola editorial y recibir aprobación final. Sólo entonces elevar el estado mediante un nuevo commit y, por separado, programar manualmente con provider receipt.
+
+## Feedback visual del propietario (2026-10-12)
+El propietario pidió evitar uncanny valley y posteriormente respondió **«Me gusta mucho!»** a la iteración gráfica `consulta_la_placa_antes_de_comprar.png`. Esto constituye **aceptación cualitativa de la dirección creativa** (escena natural, composición premium, hook y CTA claros), pero **no certifica exactitud del logo, píxeles finales, zonas seguras, derechos, historial o precio/cobertura**. Por tanto no se transforma `gates.design` ni `gates.owner` en PASS. El gate comercial/novelty, revisión final móvil y decisión de scheduling permanecen bloqueados. No publicar ni marcar Scheduled sin receipts externos.
