@@ -1,0 +1,144 @@
+{
+  "schema_version": "placaclara-social-package/v1",
+  "content_id": "PC-20261012-COVERAGE-DATE-001",
+  "brand_id": "placaclara",
+  "platform": "tiktok",
+  "locale": "es-PE",
+  "objective": "COVERAGE_INTENT",
+  "editorial": {
+    "audience_problem": "Comprador de usado sin claridad sobre fecha/fuente de datos mostrados",
+    "topic_id": "fecha-y-procedencia-de-consulta",
+    "angle_id": "cuando-se-consulto-importa",
+    "lesson_id": "source-date-coverage-context",
+    "hook_family": "document-date-challenge",
+    "primary_action": "CHECK_COVERAGE"
+  },
+  "copy": {
+    "hook": "Te mostraron un dato. ¿De qué fecha es?",
+    "subhook": "Antes de confiar, revisa fuente, fecha y cobertura.",
+    "caption": "Te mostraron un dato del auto. Pero hay una pregunta que puede cambiar cómo lo interpretas: ¿de qué fecha es? 🔎\n\nAntes de decidir por un usado, revisa tres cosas: la FUENTE, la FECHA de consulta y la COBERTURA. Un resultado depende de lo que cada fuente pueda devolver y de cuándo se consultó.\n\nEn PlacaClara puedes ingresar la placa y revisar la cobertura disponible antes de continuar con la compra de un reporte. La información puede ser parcial o no estar disponible; no sustituye una revisión mecánica ni una certificación registral.\n\n👉 Revisa la cobertura de la placa en placaclara.com\n\n#PlacaClara #AutosUsadosPeru #CompraDeAutos #ConsultaVehicular #AutosPeru",
+    "cta": "Consulta la placa y revisa la cobertura disponible en placaclara.com.",
+    "alt_text": "Póster vertical de PlacaClara. Una escena ilustrativa muestra a una persona revisando su teléfono frente a un SUV en un lote de autos usados al atardecer. El titular dice: «Te mostraron un dato. ¿De qué fecha es?». Un panel recuerda revisar la fuente, la fecha y la cobertura. Al final, un llamado a la acción dice: «Consulta la placa. Revisa la cobertura disponible. placaclara.com». La escena está identificada como una ilustración conceptual, no como un reporte real.",
+    "visual_text": [
+      "PlacaClara",
+      "ANTES DE COMPRAR UN USADO",
+      "TE MOSTRARON",
+      "UN DATO.",
+      "¿DE QUÉ FECHA",
+      "ES?",
+      "ANTES DE CONFIAR, REVISA:",
+      "FUENTE",
+      "FECHA",
+      "COBERTURA",
+      "ILUSTRACIÓN CONCEPTUAL · NO ES UN REPORTE REAL",
+      "CONSULTA LA PLACA",
+      "Revisa la cobertura disponible",
+      "placaclara.com"
+    ]
+  },
+  "claims": [
+    {
+      "claim_id": "PC-C001",
+      "text": "La procedencia y fecha de consulta permiten interpretar el alcance temporal de información documental; no se promete actualidad o cobertura universal.",
+      "category": "EDUCATION",
+      "provenance": "OBSERVED",
+      "evidence_refs": [
+        "src/config/product.ts",
+        "components/marketing/coverage-list.tsx",
+        "app/(marketing)/page.tsx"
+      ],
+      "verified_at": "2026-10-12",
+      "capability_code": null,
+      "limitation": "Fuente y fecha pueden variar, y no toda fuente devuelve resultados."
+    },
+    {
+      "claim_id": "PC-C002",
+      "text": "La experiencia web contempla ingresar una placa y consultar cobertura antes del checkout.",
+      "category": "EDUCATION",
+      "provenance": "OBSERVED",
+      "evidence_refs": [
+        "components/marketing/plate-form.tsx",
+        "app/consulta/page.tsx",
+        "app/(marketing)/page.tsx"
+      ],
+      "verified_at": "2026-10-12",
+      "capability_code": null,
+      "limitation": "Verificación de disponibilidad efectiva del despliegue aún pendiente; no atribuye capacidades concretas."
+    }
+  ],
+  "product_snapshot": {
+    "captured_at": null,
+    "evidence_ref": null,
+    "price_pen": null,
+    "enabled_capabilities": [],
+    "commercial_ready": null,
+    "launch_profile": null,
+    "live_deployment_verified": false
+  },
+  "novelty": {
+    "status": "REVIEW_REQUIRED",
+    "checked_dimensions": [
+      "topic",
+      "angle",
+      "lesson",
+      "hook_family",
+      "example",
+      "visual_pattern",
+      "structure",
+      "cta"
+    ],
+    "published_ref": null,
+    "scheduled_ref": null,
+    "planned_ref": "conversation-user-reference-2026-10-12 (partial only)",
+    "approved_ref": null,
+    "review_ref": null
+  },
+  "creative": {
+    "format": "vertical_9_16",
+    "asset_ref": "placaclara_fecha_fuente_cobertura_tiktok_1080x1920.png",
+    "sha256": "ff1b7f89d6358485ac7a8cc9c2e54ccd786bb3c0cf19c0640617c5354c6731db",
+    "mark_ref": "public/placaclara-mark.svg",
+    "visual_scope": "RENDERED_UNREVIEWED",
+    "safe_zone_review_ref": "qa_safe_zone_overlay.png (geometry; app preview remains pending)",
+    "phone_review_ref": "qa_phone_270x480.png (simulation; owner/device review pending)",
+    "design_approval_ref": null,
+    "rights_review_ref": null,
+    "illustration_disclosure": "ILUSTRACIÓN CONCEPTUAL · NO ES UN REPORTE REAL"
+  },
+  "gates": {
+    "factual": "PASS",
+    "product_claims": "PENDING",
+    "price": "PENDING",
+    "novelty": "PENDING",
+    "design": "PENDING",
+    "safe_zone": "PENDING",
+    "legal": "PENDING",
+    "owner": "PENDING"
+  },
+  "release": {
+    "status": "DRAFT",
+    "owner_receipt": null,
+    "scheduled_at": null,
+    "provider_receipt": null,
+    "published_url": null
+  },
+  "measurement": {
+    "hypothesis": "Un contraste sobre la vigencia contextual de datos induce consultas de cobertura, sin crear promesas absolutas.",
+    "primary_metric": "plate_submitted",
+    "window": "T_PLUS_24H",
+    "traffic_mode": "UNKNOWN",
+    "attribution": "UNKNOWN",
+    "baseline_ref": null,
+    "external_receipt": null
+  },
+  "gate_receipts": {
+    "factual": "repo:Em3rc0d/plate@main:src/config/product.ts + app/(marketing)/page.tsx + components/marketing/coverage-list.tsx",
+    "product_claims": null,
+    "price": null,
+    "novelty": null,
+    "design": null,
+    "safe_zone": null,
+    "legal": null,
+    "owner": null
+  }
+}
