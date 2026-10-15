@@ -10,6 +10,7 @@ Lee en orden:
 4. [Ejemplo sintético intencionalmente bloqueado](fixtures/DRAFT.example.json)
 5. [Preflight offline](preflight.mjs)
 6. [Gate de lanzamiento y evidencia faltante](RELEASE_GATES.md)
+7. [3S4F — heurística experimental de atención](3S4F.md)
 
 ### Pruebas (Node 22, sin instalar paquetes ni consultar APIs)
 ```bash
@@ -25,3 +26,7 @@ Toda copia publicitaria debe comprobar el alcance real a través de src/config/p
 ## Pilotos registrados (no certificados)
 
 - [PC-20261012-COVERAGE-DATE-001](pilots/PC-20261012-COVERAGE-DATE-001/README.md): visual premium aprobado como dirección, normalizado a 1080×1920 para revisión; release DRAFT/BLOCKED por brand/safe-zone/novelty/commercial snapshot y QA en plataforma pendientes.
+
+## Heurística 3S4F
+
+`3S4F` se registra como marco creativo **EXPERIMENTAL / NON-SCIENTIFIC** para diseñar hooks y tensión narrativa. Puede intensificar el primer segundo, pero nunca sustituye evidencia, verificación de claims, novedad, QA, legal ni aprobación. Ver [3S4F.md](3S4F.md).
